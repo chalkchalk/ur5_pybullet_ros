@@ -7,7 +7,7 @@ class RobotBase(object):
     The base class for robots
     """
 
-    def __init__(self, name, urdf_file, pos, ori, inital_angle, gripper_range, arm_joint, gripper_joint):
+    def __init__(self, name, urdf_file, pos, ori, inital_angle, gripper_range, arm_joint, eef_joint):
         """
         Arguments:
             pos: [x y z]
@@ -44,8 +44,7 @@ class RobotBase(object):
         self.arm_num_dofs = len(inital_angle)
         self.gripper_range = gripper_range
         self.arm_joint = arm_joint
-        self.gripper_joint = gripper_joint
-        
+        self.eef_joint = eef_joint
         self.load()
 
     def load(self):
@@ -59,7 +58,6 @@ class RobotBase(object):
         jointInfo = namedtuple('jointInfo', 
             ['id','name','type','damping','friction','lowerLimit','upperLimit','maxForce','maxVelocity','controllable'])
         self.joints = []
-        self.controllable_joints = []
         self.arm_motor_ids = []
         self.joints_name = []
         for i in range(numJoints):
@@ -78,8 +76,12 @@ class RobotBase(object):
                 p.setJointMotorControl2(self.id, jointID, p.VELOCITY_CONTROL, targetVelocity=0, force=0)
             info = jointInfo(jointID,jointName,jointType,jointDamping,jointFriction,jointLowerLimit,
                             jointUpperLimit,jointMaxForce,jointMaxVelocity,controllable)
+            if self.eef_joint == jointName:
+                self.eef_id = jointID
+            print(i, self.eef_joint, jointName)
             self.joints.append(info)
             self.joints_name.append(jointName)
+        assert hasattr(self, 'eef_id'), "eef_id is not found!"
         for motor_joint in self.arm_joint:
             self.arm_motor_ids.append(self.joints_name.index(motor_joint))
 
@@ -126,14 +128,18 @@ class RobotBase(object):
         for i, joint_id in enumerate(self.arm_motor_ids):
             p.setJointMotorControl2(self.id, joint_id, p.POSITION_CONTROL, joint_poses[i],
                                     force=self.joints[joint_id].maxForce, maxVelocity=self.joints[joint_id].maxVelocity)
+        self.post_control()
 
     def move_gripper(self, open_length):
+        raise NotImplementedError
+    
+    def post_control(self):
         raise NotImplementedError
 
     def get_joint_obs(self):
         positions = []
         velocities = []
-        for joint_id in self.controllable_joints:
+        for joint_id in self.arm_motor_ids:
             pos, vel, _, _ = p.getJointState(self.id, joint_id)
             positions.append(pos)
             velocities.append(vel)

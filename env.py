@@ -14,14 +14,16 @@ class Environment():
         # p.resetDebugVisualizerCamera(1.674, 70, -50.8, [0, 0, 0])+
         self.load_scenes()
 
-    def step(self, action):
+    def step(self):
+        action = self.robot.set_angle[0]
         self.robot.move_ee(action, "joint")
+        self.robot.post_control()
         p.stepSimulation()
         time.sleep(0.001)
 
     def load_scenes(self):
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
-        p.loadURDF('plane.urdf', [0, 0, -0.63], [0, 0, 0, 1])
+        p.loadURDF('plane.urdf', [0, 0, 0], [0, 0, 0, 1])
 
 CONFIG_FILE = ("config/env_default.gin")
 gin.parse_config_file(CONFIG_FILE)
@@ -29,4 +31,4 @@ gin.parse_config_file(CONFIG_FILE)
 if __name__ == "__main__":
     env = Environment()
     while True:
-        env.step(env.robot.arm_rest_poses)
+        env.step()
