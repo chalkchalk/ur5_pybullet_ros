@@ -1,4 +1,4 @@
-UR5.urdf_file =  "/root/docker_mount/ur5_pybullet/urdf/ur5_robotiq_85.urdf"
+UR5.urdf_file =  "/root/docker_mount/ur5_ros_pybullet/src/ur5_pybullet_ros/script/urdf/ur5_robotiq_85.urdf"
 UR5.base_pos = [-0.5, 0.0, 0]
 UR5.base_ori = [0, 0, 0, 1]
 UR5.inital_angle = [-1.5690622952052096, -1.5446774605904932, 1.343946009733127, -1.3708613585093699, -1.5707970583733368, 0.0009377758247187636]

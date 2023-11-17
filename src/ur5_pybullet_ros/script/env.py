@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import pybullet as p
 from robots.ur5 import UR5
 import gin
@@ -25,7 +26,7 @@ class Environment():
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.loadURDF('plane.urdf', [0, 0, 0], [0, 0, 0, 1])
 
-CONFIG_FILE = ("config/env_default.gin")
+CONFIG_FILE = ("/root/docker_mount/ur5_ros_pybullet/src/ur5_pybullet_ros/script/config/env_default.gin")
 gin.parse_config_file(CONFIG_FILE)
 
 if __name__ == "__main__":

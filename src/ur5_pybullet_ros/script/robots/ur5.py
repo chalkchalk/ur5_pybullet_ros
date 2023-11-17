@@ -5,6 +5,7 @@ import math
 from ros_wrapper.ros_wrapper import RosWrapper
 from ros_wrapper.ros_msg import ROSDtype, RobotJointState
 
+
 ROS_SET_ANGLE_TOPIC = "set_angle"
 ROS_JOINT_STATES_TOPIC = "joint_states"
 ROS_JOINT_ANGLE_TOPIC = "joint_angles"
@@ -38,7 +39,7 @@ class UR5(RobotBase):
         open_angle = 0.715 - math.asin((open_length - 0.010) / 0.1143)  # angle calculation
 
 
-CONFIG_FILE = ("config/ur5_default.gin")
+CONFIG_FILE = ("/root/docker_mount/ur5_ros_pybullet/src/ur5_pybullet_ros/script/config/ur5_default.gin")
 gin.parse_config_file(CONFIG_FILE)
 
 if __name__ == "__main__":

@@ -50,7 +50,6 @@ class RobotBase(object):
     def load(self):
         self.__parse_joint_info__()
         self.__post_load__()
-        print(self.joints)
 
 
     def __parse_joint_info__(self):
@@ -78,7 +77,6 @@ class RobotBase(object):
                             jointUpperLimit,jointMaxForce,jointMaxVelocity,controllable)
             if self.eef_joint == jointName:
                 self.eef_id = jointID
-            print(i, self.eef_joint, jointName)
             self.joints.append(info)
             self.joints_name.append(jointName)
         assert hasattr(self, 'eef_id'), "eef_id is not found!"
