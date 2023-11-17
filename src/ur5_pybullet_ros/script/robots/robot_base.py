@@ -45,11 +45,14 @@ class RobotBase(object):
         self.gripper_range = gripper_range
         self.arm_joint = arm_joint
         self.eef_joint = eef_joint
+        
+        
         self.load()
 
     def load(self):
         self.__parse_joint_info__()
         self.__post_load__()
+        # print(self.joints)
 
 
     def __parse_joint_info__(self):
@@ -59,6 +62,10 @@ class RobotBase(object):
         self.joints = []
         self.arm_motor_ids = []
         self.joints_name = []
+        
+        self.rotate_joint_names = []
+        self.rotate_joint_id = []
+        
         for i in range(numJoints):
             info = p.getJointInfo(self.id, i)
             jointID = info[0]
@@ -75,9 +82,16 @@ class RobotBase(object):
                 p.setJointMotorControl2(self.id, jointID, p.VELOCITY_CONTROL, targetVelocity=0, force=0)
             info = jointInfo(jointID,jointName,jointType,jointDamping,jointFriction,jointLowerLimit,
                             jointUpperLimit,jointMaxForce,jointMaxVelocity,controllable)
+            self.joints.append(info)
             if self.eef_joint == jointName:
                 self.eef_id = jointID
-            self.joints.append(info)
+            
+            if jointType is not 4:
+                self.rotate_joint_names.append(jointName)
+                self.rotate_joint_id.append(jointID)
+            # print(jointID, jointName)
+            
+            
             self.joints_name.append(jointName)
         assert hasattr(self, 'eef_id'), "eef_id is not found!"
         for motor_joint in self.arm_joint:
@@ -125,7 +139,8 @@ class RobotBase(object):
         # arm
         for i, joint_id in enumerate(self.arm_motor_ids):
             p.setJointMotorControl2(self.id, joint_id, p.POSITION_CONTROL, joint_poses[i],
-                                    force=self.joints[joint_id].maxForce, maxVelocity=self.joints[joint_id].maxVelocity)
+                                    force=self.joints[joint_id].maxForce, maxVelocity=self.joints[joint_id].maxVelocity, 
+                                    positionGain=0.1, velocityGain=0.7)
         self.post_control()
 
     def move_gripper(self, open_length):
@@ -137,11 +152,24 @@ class RobotBase(object):
     def get_joint_obs(self):
         positions = []
         velocities = []
+        torques = []
         for joint_id in self.arm_motor_ids:
-            pos, vel, _, _ = p.getJointState(self.id, joint_id)
+            pos, vel, _ , torque = p.getJointState(self.id, joint_id)
+            velocities.append(vel)
+            positions.append(pos)
+            velocities.append(torque)
+        # ee_pos = p.getLinkState(self.id, self.eef_id)[0]
+        return dict(positions=positions, velocities=velocities, torques=torques)
+    
+    def get_rotate_joint_info_all(self):
+        positions = []
+        velocities = []
+        torques = []
+        for i in range(len(self.rotate_joint_id)):
+            pos, vel, _ , torque = p.getJointState(self.id, self.rotate_joint_id[i])
             positions.append(pos)
             velocities.append(vel)
-        ee_pos = p.getLinkState(self.id, self.eef_id)[0]
-        return dict(positions=positions, velocities=velocities, ee_pos=ee_pos)
+            torques.append(torque)
+        return dict(positions=positions, velocities=velocities, torques=torques)
 
 

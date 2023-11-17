@@ -30,8 +30,8 @@ class UR5(RobotBase):
         self.pub_ros_info()
 
     def pub_ros_info(self):
-        joint_info = self.get_joint_obs()
-        joint_state = RobotJointState(self.arm_joint, joint_info["positions"], joint_info["velocities"], [0 for i in range(self.arm_num_dofs)])
+        joint_info = self.get_rotate_joint_info_all()
+        joint_state = RobotJointState(self.rotate_joint_names, joint_info["positions"], joint_info["velocities"], joint_info["torques"])
         self.ros_wrapper.publish_msg(ROS_JOINT_STATES_TOPIC, joint_state)
         # print(joint_info)
         
