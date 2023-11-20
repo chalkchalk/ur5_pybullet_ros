@@ -1,0 +1,7 @@
+<launch>
+    <rosparam command="load" file="$(find ur5_pybullet_ros)/config/controller/controller.yaml"/>
+    <node name="controller_manager" pkg="controller_manager" type="spawner" respawn="false" output="screen"
+        args="joint1_position_controller joint2_position_controller joint3_position_controller "/>
+    
+    
+</launch>
