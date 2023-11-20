@@ -162,14 +162,16 @@ class RobotBase(object):
         return dict(positions=positions, velocities=velocities, torques=torques)
     
     def get_rotate_joint_info_all(self):
+        id = []
         positions = []
         velocities = []
         torques = []
         for i in range(len(self.rotate_joint_id)):
             pos, vel, _ , torque = p.getJointState(self.id, self.rotate_joint_id[i])
+            id.append(self.rotate_joint_id[i])
             positions.append(pos)
             velocities.append(vel)
             torques.append(torque)
-        return dict(positions=positions, velocities=velocities, torques=torques)
+        return dict(id=id, positions=positions, velocities=velocities, torques=torques)
 
 

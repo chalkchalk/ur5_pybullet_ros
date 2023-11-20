@@ -4,6 +4,7 @@ from robots.ur5 import UR5
 import gin
 import time
 import pybullet_data
+from ros_wrapper.joint_trajectory_action_server import ActionState
 
 @gin.configurable
 class Environment():
@@ -16,6 +17,9 @@ class Environment():
         self.load_scenes()
 
     def step(self):
+        
+        if self.robot.joint_tra_action_server.action_state == ActionState.RUNNNING:
+            self.robot.set_angle[0] = self.robot.joint_tra_action_server.goal.trajectory.points[-1].positions
         action = self.robot.set_angle[0]
         self.robot.move_ee(action, "joint")
         self.robot.post_control()
@@ -26,7 +30,7 @@ class Environment():
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.loadURDF('plane.urdf', [0, 0, 0], [0, 0, 0, 1])
 
-CONFIG_FILE = ("/root/docker_mount/ur5_ros_pybullet/src/ur5_pybullet_ros/script/config/env_default.gin")
+CONFIG_FILE = ("/root/docker_mount/ur5_pybullet_ros/src/ur5_pybullet_ros/script/config/env_default.gin")
 gin.parse_config_file(CONFIG_FILE)
 
 if __name__ == "__main__":

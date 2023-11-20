@@ -4,6 +4,7 @@ import gin
 import math
 from ros_wrapper.ros_wrapper import RosWrapper
 from ros_wrapper.ros_msg import ROSDtype, RobotJointState
+from ros_wrapper.joint_trajectory_action_server import JointTrajectoryActionServer
 
 
 ROS_SET_ANGLE_TOPIC = "set_angle"
@@ -22,6 +23,7 @@ class UR5(RobotBase):
 
     def init_ros_interface(self):
         self.ros_wrapper = RosWrapper("ur5_pybullet")
+        self.joint_tra_action_server = JointTrajectoryActionServer(self. arm_joint, "ur5_controller")
         self.ros_wrapper.add_subscriber(ROS_SET_ANGLE_TOPIC, ROSDtype.FLOAT_ARRAY, self.set_angle)
         self.ros_wrapper.add_publisher(ROS_JOINT_STATES_TOPIC, ROSDtype.JOINT_STATE)
         self.ros_wrapper.add_publisher(ROS_JOINT_ANGLE_TOPIC, ROSDtype.FLOAT_ARRAY)
@@ -31,6 +33,8 @@ class UR5(RobotBase):
 
     def pub_ros_info(self):
         joint_info = self.get_rotate_joint_info_all()
+        joint_arm_info = self.get_joint_obs()
+        self.joint_tra_action_server .update_current_state(joint_arm_info["positions"], joint_arm_info["velocities"])
         joint_state = RobotJointState(self.rotate_joint_names, joint_info["positions"], joint_info["velocities"], joint_info["torques"])
         self.ros_wrapper.publish_msg(ROS_JOINT_STATES_TOPIC, joint_state)
         # print(joint_info)
@@ -39,7 +43,7 @@ class UR5(RobotBase):
         open_angle = 0.715 - math.asin((open_length - 0.010) / 0.1143)  # angle calculation
 
 
-CONFIG_FILE = ("/root/docker_mount/ur5_ros_pybullet/src/ur5_pybullet_ros/script/config/ur5_default.gin")
+CONFIG_FILE = ("/root/docker_mount/ur5_pybullet_ros/src/ur5_pybullet_ros/script/config/ur5_default.gin")
 gin.parse_config_file(CONFIG_FILE)
 
 if __name__ == "__main__":
