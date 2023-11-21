@@ -12,7 +12,7 @@
     <node pkg="ur5_pybullet_ros" type="ur5_demo.py" name="ur5_pybullet" output="screen"/>
 
     <group if="$(arg use_rviz)">
-         <node pkg="rviz" type="rviz" name="rviz" args="-d $(find ur5_pybullet_ros)/config/ur5.rviz" />
+         <node pkg="rviz" type="rviz" name="rviz" args="-d $(find ur5_pybullet_ros)/config/ur5.rviz"  respawn="false" />
     </group>
 
 </launch>

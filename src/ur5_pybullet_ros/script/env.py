@@ -5,7 +5,6 @@ import gin
 import time
 import pybullet_data
 import ros_wrapper.ros_msg 
-from ros_wrapper.joint_trajectory_action_server import ActionState
 from ros_wrapper.ros_wrapper import RosWrapper
 import os
 
@@ -29,8 +28,6 @@ class Environment():
 
     def step(self):
         start_time = time.time()
-        if self.robot.joint_tra_action_server.action_state == ActionState.RUNNNING:
-            self.robot.set_angle[0] = self.robot.joint_tra_action_server.goal.trajectory.points[-1].positions
         action = self.robot.set_angle[0]
         self.robot.move_ee(action, "joint")
         p.stepSimulation()

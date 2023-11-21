@@ -1,11 +1,13 @@
 from robots.robot_base import RobotBase
+import os
 import pybullet as p
 import gin
 import math
 from ros_wrapper.ros_wrapper import RosWrapper
 from ros_wrapper.ros_msg import ROSDtype, RobotJointState
-from ros_wrapper.joint_trajectory_action_server import JointTrajectoryActionServer
-import os
+from ros_wrapper.joint_trajectory_action_server import  JointTrajectoryActionServer, ActionState
+from controller.trajectory import get_trajectory_from_ros_msg
+from controller.trajectory_follower import TrajecyFollower, FollowState
 
 ROS_SET_ANGLE_TOPIC = "set_angle"
 ROS_JOINT_STATES_TOPIC = "joint_states"
@@ -18,7 +20,11 @@ class UR5(RobotBase):
         urdf_file = os.path.dirname(os.path.abspath(__file__)) + "/../urdf/" + urdf_file
         super().__init__(self.name, urdf_file, base_pos, base_ori, inital_angle, gripper_range, arm_joint, eef_joint)
         self.reset()
-        self.set_angle = [inital_angle]
+        self.time = 0
+        self.set_angle = [inital_angle] # we use list to make it a mutable variable, so the callback of ros can change this value naturely
+        self.trajectory_follower = TrajecyFollower(self. arm_joint)
+        self.joint_info_all = {}
+        self.joint_arm_info = {}
         self.init_ros_interface()
 
 
@@ -32,11 +38,25 @@ class UR5(RobotBase):
     def post_control(self):
         self.pub_ros_info()
 
+    def pre_control(self):
+        self.time = self.ros_wrapper.ros_time
+        self.joint_info_all = self.get_rotate_joint_info_all()
+        self.joint_arm_info = self.get_joint_obs()
+        self.trajectory_follower.loop(self.joint_arm_info["positions"], self.joint_arm_info ["velocities"])
+        if self.joint_tra_action_server.new_goal:
+            # self.set_angle[0] = self.joint_tra_action_server.goal.trajectory.points[-1].positions
+            trajectory = get_trajectory_from_ros_msg(self.joint_tra_action_server.goal, self.time)
+            self.trajectory_follower.set_trajectory(trajectory)
+            self.joint_tra_action_server.new_goal = False
+
+        if self.trajectory_follower.state == FollowState.RUNNNING:
+            sef_point = self.trajectory_follower.get_control_point(self.time)
+            self.set_angle[0] = sef_point.positions
+        
+        
     def pub_ros_info(self):
-        joint_info = self.get_rotate_joint_info_all()
-        joint_arm_info = self.get_joint_obs()
-        self.joint_tra_action_server .update_current_state(joint_arm_info["positions"], joint_arm_info["velocities"])
-        joint_state = RobotJointState(self.rotate_joint_names, joint_info["positions"], joint_info["velocities"], joint_info["torques"])
+        self.joint_tra_action_server .update_current_state(self.joint_arm_info ["positions"], self.joint_arm_info ["velocities"])
+        joint_state = RobotJointState(self.rotate_joint_names, self.joint_info_all["positions"], self.joint_info_all["velocities"], self.joint_info_all["torques"])
         self.ros_wrapper.publish_msg(ROS_JOINT_STATES_TOPIC, joint_state)
         # print(joint_info)
         

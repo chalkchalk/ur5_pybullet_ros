@@ -22,12 +22,14 @@ class JointTrajectoryActionServer:
         self.goal = FollowJointTrajectoryGoal()
         self.joint_pos = []
         self.joint_vel = []
+        self.new_goal = False
         self.server = actionlib.SimpleActionServer("/%s/follow_joint_trajectory"%(controller_name),
             FollowJointTrajectoryAction,execute_cb=self.execute_trajectory,
             auto_start=False
         )
         rospy.loginfo("server init")
         self.server.start()
+        
     
     def is_success(self):
         is_success = np.linalg.norm(np.array(self.joint_pos) - np.array(self.goal.trajectory.points[-1].positions)) < GOAL_TORLERANCE
@@ -43,7 +45,9 @@ class JointTrajectoryActionServer:
         index = [self.joint_names.index(joint_names[i]) for i in range(len(joint_names))] # the order in moveit control output is alphabet order, we have to correct it
         for i in range(len(self.goal.trajectory.points)):
             self.goal.trajectory.points[i].positions = [self.goal.trajectory.points[i].positions[k] for k in index]
+        self.goal.trajectory.joint_names = joint_names
         self.action_state = ActionState.RUNNNING
+        self.new_goal = True
         while self.action_state != ActionState.IDLE:
             if self.server.is_preempt_requested():
                 rospy.loginfo("Trajectory execution preempted")

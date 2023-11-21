@@ -124,6 +124,7 @@ class RobotBase(object):
         self.move_gripper(self.gripper_range[0])
 
     def move_ee(self, action, control_method):
+        self.pre_control()
         assert control_method in ('joint', 'end')
         if control_method == 'end':
             x, y, z, roll, pitch, yaw = action
@@ -145,8 +146,12 @@ class RobotBase(object):
     def move_gripper(self, open_length):
         raise NotImplementedError
     
+    def pre_control(self):
+        raise NotImplementedError
+    
     def post_control(self):
         raise NotImplementedError
+    
 
     def get_joint_obs(self):
         positions = []
@@ -156,7 +161,7 @@ class RobotBase(object):
             pos, vel, _ , torque = p.getJointState(self.id, joint_id)
             velocities.append(vel)
             positions.append(pos)
-            velocities.append(torque)
+            torques.append(torque)
         # ee_pos = p.getLinkState(self.id, self.eef_id)[0]
         return dict(positions=positions, velocities=velocities, torques=torques)
     
