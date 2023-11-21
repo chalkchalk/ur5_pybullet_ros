@@ -28,12 +28,16 @@ class Environment():
 
     def step(self):
         start_time = time.time()
-        action = self.robot.set_angle[0]
-        self.robot.move_ee(action, "joint")
-        p.stepSimulation()
+        
         self.time += self.dt
         self.ros_wrapper.ros_time = self.time
         self.ros_wrapper.publish_msg(ROS_CLOCK_TOPIC, ros_wrapper.ros_msg.ROSClock(self.time))
+        
+        
+        action = self.robot.set_angle[0]
+        self.robot.move_ee(action, "joint")
+        p.stepSimulation()
+        
         
         
         end_time = time.time()

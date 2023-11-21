@@ -32,7 +32,7 @@ class UR5(RobotBase):
         self.ros_wrapper = RosWrapper("ur5_pybullet")
         self.joint_tra_action_server = JointTrajectoryActionServer(self. arm_joint, "ur5_controller")
         self.ros_wrapper.add_subscriber(ROS_SET_ANGLE_TOPIC, ROSDtype.FLOAT_ARRAY, self.set_angle)
-        self.ros_wrapper.add_publisher(ROS_JOINT_STATES_TOPIC, ROSDtype.JOINT_STATE)
+        self.ros_wrapper.add_publisher(ROS_JOINT_STATES_TOPIC, ROSDtype.JOINT_STATE, False)
         self.ros_wrapper.add_publisher(ROS_JOINT_ANGLE_TOPIC, ROSDtype.FLOAT_ARRAY)
 
     def post_control(self):
