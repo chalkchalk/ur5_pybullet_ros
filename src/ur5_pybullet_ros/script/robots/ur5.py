@@ -27,7 +27,6 @@ class UR5(RobotBase):
         self.joint_arm_info = {}
         self.init_ros_interface()
 
-
     def init_ros_interface(self):
         self.ros_wrapper = RosWrapper("ur5_pybullet")
         self.joint_tra_action_server = JointTrajectoryActionServer(self. arm_joint, "ur5_controller")

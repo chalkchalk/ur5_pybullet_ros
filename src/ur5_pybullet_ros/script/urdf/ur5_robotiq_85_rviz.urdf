@@ -526,7 +526,7 @@
     <joint name="world_arm_joint" type="fixed">
         <parent link="world" />
         <child link="base_link" />
-        <origin rpy="0.0 0.0 0" xyz="0 0 0" />
+        <origin rpy="0.0 0.0 0" xyz="0 0 0.5" />
     </joint>
     <transmission name="trans_shoulder_pan_joint">
         <type>transmission_interface/SimpleTransmission</type>

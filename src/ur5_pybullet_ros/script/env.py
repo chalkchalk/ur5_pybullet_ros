@@ -27,13 +27,11 @@ class Environment():
         self.load_scenes()
 
     def step(self):
-        start_time = time.time()
-        
+        start_time = time.time()   
         self.time += self.dt
         self.ros_wrapper.ros_time = self.time
         self.ros_wrapper.publish_msg(ROS_CLOCK_TOPIC, ros_wrapper.ros_msg.ROSClock(self.time))
-        
-        
+
         action = self.robot.set_angle[0]
         self.robot.move_ee(action, "joint")
         p.stepSimulation()
