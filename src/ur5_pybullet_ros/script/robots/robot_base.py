@@ -46,7 +46,6 @@ class RobotBase(object):
         self.arm_joint = arm_joint
         self.eef_joint = eef_joint
         
-        
         self.load()
 
     def load(self):

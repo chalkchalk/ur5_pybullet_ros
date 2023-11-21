@@ -4,7 +4,8 @@ from std_msgs.msg import Float64MultiArray, Float64
 from sensor_msgs.msg import JointState, Imu
 from geometry_msgs.msg import WrenchStamped
 from enum import Enum
-
+from rosgraph_msgs.msg import Clock
+from std_msgs.msg import Header
 
 class ROSDtype(Enum):
     FLOAT = Float64
@@ -13,6 +14,14 @@ class ROSDtype(Enum):
     WRENCH = WrenchStamped
     FORCE = WrenchStamped
     IMU = Imu
+    CLOCK  = Clock
+    
+class ROSClock(Clock):
+    def __init__(self, time):
+        super().__init__()
+        self.clock = rospy.Time.from_sec(time)
+        # header=Header(stamp=rospy.Time.from_sec(time))
+        # self = Clock()
 
 class RobotJointState(JointState):
     def __init__(self, name, pos, vel, tor):
@@ -36,7 +45,7 @@ class ImuData(Imu):
         self.linear_acceleration.y = lin_acc[1]
         self.linear_acceleration.z = lin_acc[2]
 
-def data_to_ros_msg(data, dtype:ROSDtype):
+def data_to_ros_msg(data, dtype:ROSDtype, ros_time):
     ros_msg = None
     if dtype == ROSDtype.FLOAT_ARRAY:
         data = np.array(data)
@@ -46,7 +55,7 @@ def data_to_ros_msg(data, dtype:ROSDtype):
     elif dtype == ROSDtype.JOINT_STATE:
         ros_msg = JointState()
         ros_msg = data
-        ros_msg.header.stamp = rospy.Time.now()
+        ros_msg.header.stamp = rospy.Time.from_sec(ros_time)
 
     elif dtype == ROSDtype.FORCE:
         data = np.array(data)
@@ -57,7 +66,7 @@ def data_to_ros_msg(data, dtype:ROSDtype):
         ros_msg.wrench.torque.x = 0
         ros_msg.wrench.torque.y = 0
         ros_msg.wrench.torque.z = 0
-        ros_msg.header.stamp = rospy.Time.now()
+        ros_msg.header.stamp = rospy.Time.from_sec(ros_time)
 
     elif dtype == ROSDtype.WRENCH:
         data = np.array(data)
@@ -68,10 +77,13 @@ def data_to_ros_msg(data, dtype:ROSDtype):
         ros_msg.wrench.torque.x = data[3]
         ros_msg.wrench.torque.y = data[4]
         ros_msg.wrench.torque.z = data[5]
-        ros_msg.header.stamp = rospy.Time.now()
+        ros_msg.header.stamp = rospy.Time.from_sec(ros_time)
 
     elif dtype == ROSDtype.IMU:
         ros_msg = JointState()
         ros_msg = data
-        ros_msg.header.stamp = rospy.Time.now()
+        ros_msg.header.stamp = rospy.Time.from_sec(ros_time)
+    
+    elif dtype == ROSDtype.CLOCK:
+        ros_msg = data
     return ros_msg
