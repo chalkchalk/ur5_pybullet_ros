@@ -42,8 +42,9 @@ class RosWrapper:
         if self.subscribers[topic][0] == ROSDtype.FLOAT:
             self.subscribers[topic][1][0] = type(self.subscribers[topic][1][0])(msg.data)
         elif self.subscribers[topic][0] == ROSDtype.FLOAT_ARRAY:
-            assert len(self.subscribers[topic][1][0]) == len(type(self.subscribers[topic][1][0])(msg.data)), "inbound float array leng"
-            self.subscribers[topic][1][0] = type(self.subscribers[topic][1][0])(msg.data)
+            print(len(self.subscribers[topic][1][0]), len(list(msg.data)))
+            assert len(self.subscribers[topic][1][0]) == len(list(msg.data)), "inbound float array leng"
+            self.subscribers[topic][1][0] = list(msg.data)
 
     def publish_msg(self, topic, msg):
         assert topic in self.publishers, "topic not registered!"

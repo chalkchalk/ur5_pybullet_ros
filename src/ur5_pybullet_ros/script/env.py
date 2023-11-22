@@ -33,7 +33,7 @@ class Environment():
         self.ros_wrapper.publish_msg(ROS_CLOCK_TOPIC, ros_wrapper.ros_msg.ROSClock(self.time))
 
         action = self.robot.set_angle[0]
-        self.robot.move_ee(action, "joint")
+        self.robot.apply_control(action, "joint")
         p.stepSimulation()
         
         

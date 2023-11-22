@@ -123,7 +123,7 @@ class RobotBase(object):
     def close_gripper(self):
         self.move_gripper(self.gripper_range[0])
 
-    def move_ee(self, action, control_method):
+    def apply_control(self, action, control_method):
         self.pre_control()
         assert control_method in ('joint', 'end')
         if control_method == 'end':
@@ -139,7 +139,7 @@ class RobotBase(object):
         # arm
         for i, joint_id in enumerate(self.arm_motor_ids):
             p.setJointMotorControl2(self.id, joint_id, p.POSITION_CONTROL, joint_poses[i],
-                                    force=self.joints[joint_id].maxForce, maxVelocity=self.joints[joint_id].maxVelocity, 
+                                    force=self.joints[joint_id].maxForce, maxVelocity=self.joints[joint_id].maxVelocity * 0.7, 
                                     positionGain=0.1, velocityGain=0.7)
         self.post_control()
 
