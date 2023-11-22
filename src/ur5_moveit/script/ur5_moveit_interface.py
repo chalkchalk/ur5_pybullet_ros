@@ -1,18 +1,26 @@
+#!/usr/bin/env python3
+
 import sys
 import rospy
 
 import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
-
+from enum import Enum
 from moveit_commander.conversions import pose_to_list
 
 try:
     from math import pi, tau, dist, fabs, cos
 except:  # For Python 2 compatibility
     from math import pi, fabs, cos, sqrt
-    
-    
+
+class ActionResult(Enum):
+    SUCCESS = 0
+    PLAN_FAILED = 1
+    EXECUTE_TIMEOUT = 2
+    INACCURATE_EXECUTION = 3
+
+
 def all_close(goal, actual, tolerance):
     """
     Convenience method for testing if the values in two lists are within a tolerance of each other.
@@ -62,14 +70,15 @@ class UR5MoveitInterface:
         
         self.group_names = self.robot.get_group_names()
         print("============ Available Planning Groups:", self.robot.get_group_names())
-
+        self.move_group.set_max_velocity_scaling_factor(0.7)
+        self.move_group.set_max_acceleration_scaling_factor(0.7)
         # Sometimes for debugging it is useful to print the entire state of the
         # robot:
-        print("============ Printing robot state")
-        print(self.robot.get_current_state())
-        print("")
-        
-        self.goal_pose_pub = rospy.Publisher('/goal_pose', geometry_msgs.msg.PoseStamped, queue_size=10)
+        # print("============ Printing robot state")
+        # print(self.robot.get_current_state())
+        # print("")
+        self.pose_goal = geometry_msgs.msg.PoseStamped()
+        self.goal_pose_pub = rospy.Publisher('/goal_pose', geometry_msgs.msg.PoseStamped, queue_size=1)
     
     def go_to_joint_state(self, joint_state):
         move_group = self.move_group
@@ -79,7 +88,8 @@ class UR5MoveitInterface:
         move_group.go(joint_goal, wait=True)
         move_group.stop()
         current_joints = move_group.get_current_joint_values()
-        return all_close(joint_goal, current_joints, 0.01)
+        if all_close(joint_goal, current_joints, 0.01):
+            return ActionResult.SUCCESS
 
     def go_to_pose_goal(self, position, orientation): 
         """
@@ -88,29 +98,72 @@ class UR5MoveitInterface:
         @returns: bool
         """
         move_group = self.move_group
-        pose_goal = geometry_msgs.msg.PoseStamped()
-        pose_goal.header.frame_id = "world"
-        pose_goal.header.stamp = rospy.Time.now()
-        pose_goal.pose.orientation.x = orientation[0]
-        pose_goal.pose.orientation.y = orientation[1]
-        pose_goal.pose.orientation.z = orientation[2]
-        pose_goal.pose.orientation.w = orientation[3]
+        self.pose_goal.header.frame_id = "world"
+        self.pose_goal.header.stamp = rospy.Time.now()
+        self.pose_goal.pose.orientation.x = orientation[0]
+        self.pose_goal.pose.orientation.y = orientation[1]
+        self.pose_goal.pose.orientation.z = orientation[2]
+        self.pose_goal.pose.orientation.w = orientation[3]
         
-        pose_goal.pose.position.x = position[0]
-        pose_goal.pose.position.y = position[1]
-        pose_goal.pose.position.z = position[2]
+        self.pose_goal.pose.position.x = position[0]
+        self.pose_goal.pose.position.y = position[1]
+        self.pose_goal.pose.position.z = position[2]
         
-        
-        self.goal_pose_pub.publish(pose_goal)
-
-        move_group.set_pose_target(pose_goal.pose)
-        success = move_group.go(wait=True)
+        move_group.set_pose_target(self.pose_goal.pose)
+        try:
+            plan_success, plan_to_current, planning_time, error_code = move_group.plan()
+            if not plan_success:
+                rospy.logerr("Plan Error!")
+                move_group.stop()
+                move_group.clear_pose_targets()
+                return ActionResult.PLAN_FAILED
+        except rospy.exceptions.ROSInterruptException:
+            pass
+        move_group.execute(plan_to_current, wait=True)
+        # success = move_group.go(wait=True)
         move_group.stop()
         move_group.clear_pose_targets()
         current_pose = self.move_group.get_current_pose().pose
-        return all_close(pose_goal.pose, current_pose, 0.01)
+        return all_close(self.pose_goal.pose, current_pose, 0.01)
+    
+    def go_to_position_goal(self, position): 
+        move_group = self.move_group
+        self.pose_goal.header.frame_id = "world"
+        self.pose_goal.header.stamp = rospy.Time.now()
+        self.pose_goal.pose.orientation.x = 0.0
+        self.pose_goal.pose.orientation.y = 0.0
+        self.pose_goal.pose.orientation.z = 0.0
+        self.pose_goal.pose.orientation.w = 1.0
+        
+        self.pose_goal.pose.position.x = position[0]
+        self.pose_goal.pose.position.y = position[1]
+        self.pose_goal.pose.position.z = position[2]
+        
+        move_group.set_position_target(position)
+        try:
+            plan_success, plan_to_current, planning_time, error_code = move_group.plan()
+            if not plan_success:
+                rospy.logerr("Plan Error!")
+                move_group.stop()
+                move_group.clear_pose_targets()
+                return ActionResult.PLAN_FAILED
+        except rospy.exceptions.ROSInterruptException:
+            pass
+        move_group.execute(plan_to_current, wait=True)
+        # success = move_group.go(wait=True)
+        move_group.stop()
+        move_group.clear_pose_targets()
+        current_pose = self.move_group.get_current_pose().pose
+        return all_close(self.pose_goal.pose, current_pose, 0.01)
+    
+    def publish_status(self):
+        self.goal_pose_pub.publish(self.pose_goal)
 
 if __name__ == "__main__":
     ur5_moveit_interface = UR5MoveitInterface()
     # ur5_moveit_interface.go_to_joint_state([0,-0.5,0,0,0,0])
-    ur5_moveit_interface.go_to_pose_goal([0.4,0.3,0.8], [0,0,0,1])
+    # ur5_moveit_interface.go_to_pose_goal([0.6,0.6,0.8], [0,0,0,1])
+    ur5_moveit_interface.go_to_position_goal([0.5,0.5,1.2])
+    while True:
+        ur5_moveit_interface.publish_status()
+        rospy.sleep(0.01)
