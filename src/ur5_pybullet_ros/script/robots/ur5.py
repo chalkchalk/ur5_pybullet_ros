@@ -8,10 +8,12 @@ from ros_wrapper.ros_msg import ROSDtype, RobotJointState
 from ros_wrapper.joint_trajectory_action_server import  JointTrajectoryActionServer, ActionState
 from controller.trajectory import get_trajectory_from_ros_msg
 from controller.trajectory_follower import TrajecyFollower, FollowState
+from camera.camera import Camera
 
 ROS_SET_ANGLE_TOPIC = "set_angle"
 ROS_JOINT_STATES_TOPIC = "joint_states"
 ROS_JOINT_ANGLE_TOPIC = "joint_angles"
+ROS_IMAGE_TOPIC = "camera"
 
 @gin.configurable
 class UR5(RobotBase):
@@ -25,6 +27,7 @@ class UR5(RobotBase):
         self.trajectory_follower = TrajecyFollower(self. arm_joint)
         self.joint_info_all = {}
         self.joint_arm_info = {}
+        self.camera = Camera()
         self.init_ros_interface()
 
     def init_ros_interface(self):
@@ -33,9 +36,12 @@ class UR5(RobotBase):
         self.ros_wrapper.add_subscriber(ROS_SET_ANGLE_TOPIC, ROSDtype.FLOAT_ARRAY, self.set_angle)
         self.ros_wrapper.add_publisher(ROS_JOINT_STATES_TOPIC, ROSDtype.JOINT_STATE, False)
         self.ros_wrapper.add_publisher(ROS_JOINT_ANGLE_TOPIC, ROSDtype.FLOAT_ARRAY)
+        self.ros_wrapper.add_publisher(ROS_IMAGE_TOPIC, ROSDtype.IMAGE)
 
     def post_control(self):
         self.pub_ros_info()
+        end_pos, end_orn = self.get_end_state()
+        self.camera.update_pose(end_pos, end_orn)
 
     def pre_control(self):
         self.time = self.ros_wrapper.ros_time
@@ -57,6 +63,8 @@ class UR5(RobotBase):
         self.joint_tra_action_server .update_current_state(self.joint_arm_info ["positions"], self.joint_arm_info ["velocities"])
         joint_state = RobotJointState(self.rotate_joint_names, self.joint_info_all["positions"], self.joint_info_all["velocities"], self.joint_info_all["torques"])
         self.ros_wrapper.publish_msg(ROS_JOINT_STATES_TOPIC, joint_state)
+        self.ros_wrapper.publish_msg(ROS_IMAGE_TOPIC, self.camera.bgr)
+        
         # print(joint_info)
         
     def move_gripper(self, open_length):

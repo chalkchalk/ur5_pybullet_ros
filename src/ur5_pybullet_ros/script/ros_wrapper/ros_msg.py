@@ -1,11 +1,12 @@
 import rospy
 import numpy as np
 from std_msgs.msg import Float64MultiArray, Float64
-from sensor_msgs.msg import JointState, Imu
+from sensor_msgs.msg import JointState, Imu, Image
 from geometry_msgs.msg import WrenchStamped
 from enum import Enum
 from rosgraph_msgs.msg import Clock
 from std_msgs.msg import Header
+from cv_bridge import CvBridge
 
 class ROSDtype(Enum):
     FLOAT = Float64
@@ -15,6 +16,7 @@ class ROSDtype(Enum):
     FORCE = WrenchStamped
     IMU = Imu
     CLOCK  = Clock
+    IMAGE = Image
     
 class ROSClock(Clock):
     def __init__(self, time):
@@ -86,4 +88,9 @@ def data_to_ros_msg(data, dtype:ROSDtype, ros_time):
     
     elif dtype == ROSDtype.CLOCK:
         ros_msg = data
+    
+    elif dtype == ROSDtype.IMAGE:
+        bridge = CvBridge()
+        ros_msg = bridge.cv2_to_imgmsg(data,  encoding="passthrough")
+
     return ros_msg

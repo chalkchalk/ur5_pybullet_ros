@@ -45,6 +45,7 @@ class RobotBase(object):
         self.gripper_range = gripper_range
         self.arm_joint = arm_joint
         self.eef_joint = eef_joint
+        self.eef_id = 0
         
         self.load()
 
@@ -177,5 +178,19 @@ class RobotBase(object):
             velocities.append(vel)
             torques.append(torque)
         return dict(id=id, positions=positions, velocities=velocities, torques=torques)
+    
+    def get_end_state(self):
+        """Get the position and orientation of the end effector.
+
+        Returns:
+        - end_pos: len=3, (x, y, z) in world coordinate system
+        - end_orn: len=4, orientation in quaternion representation (x, y, z, w)
+        """
+        end_state = p.getLinkState(self.id, self.eef_id)
+        end_pos = end_state[0]
+        end_orn = end_state[1]
+
+        return end_pos, end_orn
+    
 
 
