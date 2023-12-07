@@ -1,10 +1,9 @@
 import rospy
 import numpy as np
 from ros_wrapper.ros_msg import ROSDtype, RobotJointState, ImuData, data_to_ros_msg
-from std_msgs.msg import Float64MultiArray, Float64
-from sensor_msgs.msg import JointState, Imu
-from geometry_msgs.msg import WrenchStamped
 import time
+
+
 
 class RosWrapper:
     def __init__(self, rosnode_name): #if rosnode_name is empty, ros_init will not be called, since only one node for each script
@@ -46,9 +45,9 @@ class RosWrapper:
             assert len(self.subscribers[topic][1][0]) == len(list(msg.data)), "inbound float array leng"
             self.subscribers[topic][1][0] = list(msg.data)
 
-    def publish_msg(self, topic, msg):
+    def publish_msg(self, topic, msg, frame_id=""):
         assert topic in self.publishers, "topic not registered!"
-        self.publishers[topic][1].publish(data_to_ros_msg(msg, self.publishers[topic][0], self.ros_time))
+        self.publishers[topic][1].publish(data_to_ros_msg(msg, self.publishers[topic][0], self.ros_time, frame_id))
 
 if __name__ == "__main__":
     wrapper = RosWrapper("test_node")

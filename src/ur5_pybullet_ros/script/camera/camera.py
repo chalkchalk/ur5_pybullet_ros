@@ -91,6 +91,7 @@ class Camera(object):
         self.update_camera_image_thread.setDaemon(True)
         self.update_camera_image_thread.start()
         self.rgb = None
+        self.point_cloud = None
         
 
 
@@ -131,6 +132,7 @@ class Camera(object):
 
             self.rgb = frame.color_image()  # 这里以显示rgb图像为例, frame还包含了深度图, 也可以转化为点云
             self.bgr = np.ascontiguousarray(self.rgb[:, :, ::-1])  # flip the rgb channel
+            self.point_cloud = frame.point_cloud()
             # cv2.imshow("image", self.bgr)
             # key = cv2.waitKey(1)
             time.sleep(0.02)
@@ -196,8 +198,9 @@ class Frame(object):
             intrinsic=self.intrinsic,
             extrinsic=self.extrinsic
         )
-
-        return pc
+        voxel_size = 0.05  # 体素大小，根据需要调整
+        pc_downsampled = pc.voxel_down_sample(voxel_size=voxel_size)
+        return pc_downsampled
 
     
 def _build_projection_matrix(intrinsic, near, far):

@@ -14,6 +14,7 @@ ROS_SET_ANGLE_TOPIC = "set_angle"
 ROS_JOINT_STATES_TOPIC = "joint_states"
 ROS_JOINT_ANGLE_TOPIC = "joint_angles"
 ROS_IMAGE_TOPIC = "camera"
+ROS_POINT_CLOUD_TOPIC = "point_cloud"
 
 @gin.configurable
 class UR5(RobotBase):
@@ -37,6 +38,7 @@ class UR5(RobotBase):
         self.ros_wrapper.add_publisher(ROS_JOINT_STATES_TOPIC, ROSDtype.JOINT_STATE, False)
         self.ros_wrapper.add_publisher(ROS_JOINT_ANGLE_TOPIC, ROSDtype.FLOAT_ARRAY)
         self.ros_wrapper.add_publisher(ROS_IMAGE_TOPIC, ROSDtype.IMAGE)
+        self.ros_wrapper.add_publisher(ROS_POINT_CLOUD_TOPIC, ROSDtype.POINT_CLOUD)
 
     def post_control(self):
         self.pub_ros_info()
@@ -64,6 +66,7 @@ class UR5(RobotBase):
         joint_state = RobotJointState(self.rotate_joint_names, self.joint_info_all["positions"], self.joint_info_all["velocities"], self.joint_info_all["torques"])
         self.ros_wrapper.publish_msg(ROS_JOINT_STATES_TOPIC, joint_state)
         self.ros_wrapper.publish_msg(ROS_IMAGE_TOPIC, self.camera.bgr)
+        self.ros_wrapper.publish_msg(ROS_POINT_CLOUD_TOPIC, self.camera.point_cloud, "ee_link")
         
         # print(joint_info)
         
