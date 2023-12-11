@@ -85,13 +85,16 @@ class Camera(object):
         self.gl_proj_matrix = self.proj_matrix.flatten(order="F")
         self.pose = [0, 0, 1]
         self.orien = [0, 0, 0, 1]
+        self.rgb = None
+        self.bgr = None
+        self.point_cloud = None
+        self.relative_offset = [0.1, 0, 0.0]  # 相机原点相对于末端执行器局部坐标系的偏移量
         # thread for updating camera image
         self.update_camera_image_thread = threading.Thread(
             target=self.update_camera_image)
         self.update_camera_image_thread.setDaemon(True)
         self.update_camera_image_thread.start()
-        self.rgb = None
-        self.point_cloud = None
+        
         
 
 
@@ -118,24 +121,26 @@ class Camera(object):
         depth = (
             1.0 * self.far * self.near / (self.far - (self.far - self.near) * z_buffer)
         )
-
         return Frame(rgb, depth, self.intrinsic, extrinsic)
     
     def update_camera_image(self):
         # cv2.namedWindow("image")
         while True:
-            wcT = self._bind_camera_to_end(self.pose, self.orien)
-            cwT = np.linalg.inv(wcT)
-
-            frame = self.render(cwT)
-            assert isinstance(frame, Frame)
-
-            self.rgb = frame.color_image()  # 这里以显示rgb图像为例, frame还包含了深度图, 也可以转化为点云
-            self.bgr = np.ascontiguousarray(self.rgb[:, :, ::-1])  # flip the rgb channel
-            self.point_cloud = frame.point_cloud()
+            self.update_camera_image_frame()
             # cv2.imshow("image", self.bgr)
             # key = cv2.waitKey(1)
             time.sleep(0.02)
+    
+    def update_camera_image_frame(self):
+        wcT = self._bind_camera_to_end(self.pose, self.orien)
+        cwT = np.linalg.inv(wcT)
+
+        frame = self.render(cwT)
+        assert isinstance(frame, Frame)
+
+        self.rgb = frame.color_image()  # 这里以显示rgb图像为例, frame还包含了深度图, 也可以转化为点云
+        self.bgr = np.ascontiguousarray(self.rgb[:, :, ::-1])  # flip the rgb channel
+        self.point_cloud = frame.point_cloud()
             
     def update_pose(self, pose, orien):
         self.pose = pose
@@ -151,16 +156,21 @@ class Camera(object):
         Returns:
         - wcT: shape=(4, 4), transform matrix, represents camera pose in world frame
         """
-        relative_offset = [-0.05, 0, 0.1]  # 相机原点相对于末端执行器局部坐标系的偏移量
+        
         end_orn = R.from_quat(end_orn).as_matrix()
         end_x_axis, end_y_axis, end_z_axis = end_orn.T
-
         wcT = np.eye(4)  # w: world, c: camera, ^w_c T
         wcT[:3, 0] = -end_y_axis  # camera x axis
         wcT[:3, 1] = -end_z_axis  # camera y axis
         wcT[:3, 2] = end_x_axis  # camera z axis
-        wcT[:3, 3] = end_orn.dot(relative_offset) + end_pos  # eye position
+        wcT[:3, 3] = end_orn.dot(self.relative_offset) + end_pos  # eye position
         return wcT
+
+    def get_cam_offset(self):
+        translation = self.relative_offset
+        rotation = [0.5,-0.5, 0.5, -0.5 ]
+        return translation, rotation
+        
             
 
 
@@ -196,7 +206,7 @@ class Frame(object):
         pc = o3d.geometry.PointCloud.create_from_rgbd_image(
             image=self.rgbd,
             intrinsic=self.intrinsic,
-            extrinsic=self.extrinsic
+            # extrinsic=self.extrinsic
         )
         voxel_size = 0.05  # 体素大小，根据需要调整
         pc_downsampled = pc.voxel_down_sample(voxel_size=voxel_size)

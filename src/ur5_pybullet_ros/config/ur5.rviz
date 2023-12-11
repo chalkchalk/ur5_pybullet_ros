@@ -28,7 +28,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: PointCloud2
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -178,6 +178,8 @@ Visualization Manager:
         All Enabled: false
         base_link:
           Value: true
+        camera_link:
+          Value: true
         ee_link:
           Value: true
         forearm_link:
@@ -232,6 +234,8 @@ Visualization Manager:
                     wrist_2_link:
                       wrist_3_link:
                         ee_link:
+                          camera_link:
+                            {}
                           robotiq_arg2f_base_link:
                             left_inner_knuckle:
                               {}
@@ -248,6 +252,34 @@ Visualization Manager:
                                   right_inner_finger_pad:
                                     {}
       Update Interval: 0
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /ur5_pybullet/point_cloud
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
       Value: true
   Enabled: true
   Global Options:
@@ -277,7 +309,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.817091703414917
+      Distance: 3.5963454246520996
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -288,14 +320,14 @@ Visualization Manager:
         X: 0
         Y: 0
         Z: 0
-      Focal Shape Fixed Size: true
+      Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.4003981947898865
+      Pitch: 0.5453983545303345
       Target Frame: <Fixed Frame>
-      Yaw: 4.233566761016846
+      Yaw: 5.148584842681885
     Saved: ~
 Window Geometry:
   Displays:
@@ -313,5 +345,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 168
-  Y: 56
+  X: 2427
+  Y: 70

@@ -46,6 +46,7 @@ class Environment():
     def load_scenes(self):
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.loadURDF('plane.urdf', [0, 0, 0], [0, 0, 0, 1])
+        bucket = p.loadURDF('tray/tray.urdf', [0.5, 0.0, 0], [0, 0, 0, 1])
 
 CONFIG_FILE = os.path.dirname(os.path.abspath(__file__)) + "/config/env_default.gin"
 gin.parse_config_file(CONFIG_FILE)

@@ -65,8 +65,12 @@ class UR5(RobotBase):
         self.joint_tra_action_server .update_current_state(self.joint_arm_info ["positions"], self.joint_arm_info ["velocities"])
         joint_state = RobotJointState(self.rotate_joint_names, self.joint_info_all["positions"], self.joint_info_all["velocities"], self.joint_info_all["torques"])
         self.ros_wrapper.publish_msg(ROS_JOINT_STATES_TOPIC, joint_state)
-        self.ros_wrapper.publish_msg(ROS_IMAGE_TOPIC, self.camera.bgr)
-        self.ros_wrapper.publish_msg(ROS_POINT_CLOUD_TOPIC, self.camera.point_cloud, "ee_link")
+        if self.camera.bgr is not None:
+            self.ros_wrapper.publish_msg(ROS_IMAGE_TOPIC, self.camera.bgr)
+        if self.camera.point_cloud is not None:
+            self.ros_wrapper.publish_msg(ROS_POINT_CLOUD_TOPIC, self.camera.point_cloud, "camera_link")
+        translation, rotation = self.camera.get_cam_offset()
+        self.ros_wrapper.publish_tf("ee_link", "camera_link", translation, rotation )
         
         # print(joint_info)
         

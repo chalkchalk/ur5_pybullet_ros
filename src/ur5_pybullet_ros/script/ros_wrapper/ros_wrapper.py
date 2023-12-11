@@ -2,8 +2,8 @@ import rospy
 import numpy as np
 from ros_wrapper.ros_msg import ROSDtype, RobotJointState, ImuData, data_to_ros_msg
 import time
-
-
+import tf2_ros
+import geometry_msgs.msg
 
 class RosWrapper:
     def __init__(self, rosnode_name): #if rosnode_name is empty, ros_init will not be called, since only one node for each script
@@ -12,6 +12,7 @@ class RosWrapper:
         self.rosnode_name = rosnode_name
         self.use_sim_time = True
         self.ros_time = 0
+        self.tf_broadcaster = tf2_ros.TransformBroadcaster()
         if rosnode_name:
             rospy.init_node(rosnode_name)
             rospy.loginfo("ROS wrapper init, node name = " + rosnode_name + ".")
@@ -48,6 +49,20 @@ class RosWrapper:
     def publish_msg(self, topic, msg, frame_id=""):
         assert topic in self.publishers, "topic not registered!"
         self.publishers[topic][1].publish(data_to_ros_msg(msg, self.publishers[topic][0], self.ros_time, frame_id))
+    
+    def publish_tf(self, fram_id, child_frame, translation, rotation):
+        transform_stamped = geometry_msgs.msg.TransformStamped()
+        transform_stamped.header.frame_id = fram_id
+        transform_stamped.child_frame_id = child_frame
+        transform_stamped.header.stamp = rospy.Time.from_sec(self.ros_time)
+        transform_stamped.transform.translation.x = translation[0]
+        transform_stamped.transform.translation.y = translation[1]
+        transform_stamped.transform.translation.z = translation[2]
+        transform_stamped.transform.rotation.x = rotation[0]
+        transform_stamped.transform.rotation.y = rotation[1]
+        transform_stamped.transform.rotation.z = rotation[2]
+        transform_stamped.transform.rotation.w = rotation[3]
+        self.tf_broadcaster.sendTransform(transform_stamped)
 
 if __name__ == "__main__":
     wrapper = RosWrapper("test_node")

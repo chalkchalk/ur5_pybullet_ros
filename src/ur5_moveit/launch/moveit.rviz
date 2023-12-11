@@ -8,7 +8,7 @@ Panels:
         - /TF1/Frames1
         - /Pose1
       Splitter Ratio: 0.5
-    Tree Height: 184
+    Tree Height: 181
   - Class: rviz/Help
     Name: Help
   - Class: rviz/Views
@@ -330,6 +330,8 @@ Visualization Manager:
         All Enabled: false
         base_link:
           Value: true
+        camera_link:
+          Value: true
         ee_link:
           Value: true
         forearm_link:
@@ -384,6 +386,8 @@ Visualization Manager:
                     wrist_2_link:
                       wrist_3_link:
                         ee_link:
+                          camera_link:
+                            {}
                           robotiq_arg2f_base_link:
                             left_inner_knuckle:
                               {}
@@ -544,11 +548,39 @@ Visualization Manager:
       Transport Hint: raw
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Min Color: 0; 0; 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.009999999776482582
+      Style: Flat Squares
+      Topic: /ur5_pybullet/point_cloud
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: base_link
+    Fixed Frame: world
     Frame Rate: 30
   Name: root
   Tools:
@@ -576,9 +608,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6453983187675476
+      Pitch: 0.4353983998298645
       Target Frame: world
-      Yaw: 0.6353983283042908
+      Yaw: 5.313584804534912
     Saved: ~
 Window Geometry:
   Displays:
@@ -594,7 +626,7 @@ Window Geometry:
     collapsed: false
   MotionPlanning - Trajectory Slider:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd00000002000000000000021c0000039bfc0200000007fb000000100044006900730070006c006100790073010000003b000000f3000000c700fffffffb0000000a0049006d00610067006501000001340000012e0000001600fffffffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c006900640065007200000001490000003f0000001600000016fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e006701000002680000016e0000016900ffffff000000010000013b0000039bfc0200000001fb0000000a00560069006500770073010000003b0000039b000000a000ffffff0000041d0000039b00000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000002000000000000021c0000039bfc0200000007fb000000100044006900730070006c006100790073010000003b000000f0000000c700fffffffb0000000a0049006d00610067006501000001310000012b0000001600fffffffb0000000800480065006c00700000000342000000bb0000006e00fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e00670100000374000001890000000000000000fb00000044004d006f00740069006f006e0050006c0061006e006e0069006e00670020002d0020005400720061006a006500630074006f0072007900200053006c006900640065007200000001490000003f0000001600000016fb0000001c004d006f00740069006f006e0050006c0061006e006e0069006e00670100000262000001740000016900ffffff000000010000013b0000039bfc0200000001fb0000000a00560069006500770073010000003b0000039b000000a000ffffff0000041d0000039b00000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
   Width: 1920
