@@ -3,6 +3,9 @@
         <arg name="use_rviz" value="false"/>
   </include>
 
-     <include file="$(find ur5_moveit)/launch/moveit_ur5_simple.launch">
+    <include file="$(find ur5_moveit)/launch/moveit_ur5_simple.launch">
+    </include>
+    
+    <include file="$(find ur5_pybullet_ros)/launch/ur5_octomap.launch">
       </include>
 </launch>
