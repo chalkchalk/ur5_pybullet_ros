@@ -6,7 +6,8 @@ import cv2
 import time
 import threading
 from scipy.spatial.transform import Rotation as R
-
+import gin
+import os
 # some codes are copied from https://github.com/ethz-asl/vgn.git
 
 
@@ -67,6 +68,7 @@ class CameraIntrinsic(object):
         return intrinsic
 
 
+@gin.configurable
 class Camera(object):
     """Virtual RGB-D camera based on the PyBullet camera interface.
 
@@ -74,7 +76,7 @@ class Camera(object):
         intrinsic: The camera intrinsic parameters.
     """
 
-    def __init__(self, camera_config="/root/docker_mount/ur5_pybullet_ros/src/ur5_pybullet_ros/script/camera/setup.json", near=0.01, far=4):
+    def __init__(self, camera_config, near, far, relative_offset, downsample_resolution):
         with open(camera_config, "r") as j:
             config = json.load(j)
         camera_intrinsic = CameraIntrinsic.from_dict(config["intrinsic"])
@@ -88,7 +90,8 @@ class Camera(object):
         self.rgb = None
         self.bgr = None
         self.point_cloud = None
-        self.relative_offset = [0.1, 0, 0.0]  # 相机原点相对于末端执行器局部坐标系的偏移量
+        self.relative_offset = relative_offset # 相机原点相对于末端执行器局部坐标系的偏移量
+        self.downsample_resolution = downsample_resolution
         # thread for updating camera image
         self.update_camera_image_thread = threading.Thread(
             target=self.update_camera_image)
@@ -140,7 +143,7 @@ class Camera(object):
 
         self.rgb = frame.color_image()  # 这里以显示rgb图像为例, frame还包含了深度图, 也可以转化为点云
         self.bgr = np.ascontiguousarray(self.rgb[:, :, ::-1])  # flip the rgb channel
-        self.point_cloud = frame.point_cloud()
+        self.point_cloud = frame.point_cloud(self.downsample_resolution)
             
     def update_pose(self, pose, orien):
         self.pose = pose
@@ -202,15 +205,18 @@ class Frame(object):
     def depth_image(self):
         return np.asarray(self.rgbd.depth)
 
-    def point_cloud(self):
+    def point_cloud(self, downsample_voxel):
         pc = o3d.geometry.PointCloud.create_from_rgbd_image(
             image=self.rgbd,
             intrinsic=self.intrinsic,
             # extrinsic=self.extrinsic
         )
-        voxel_size = 0.05  # 体素大小，根据需要调整
-        pc_downsampled = pc.voxel_down_sample(voxel_size=voxel_size)
-        return pc_downsampled
+        if downsample_voxel > 0:
+            voxel_size = downsample_voxel  # 体素大小，根据需要调整
+            pc_downsampled = pc.voxel_down_sample(voxel_size=voxel_size)
+            return pc_downsampled
+        else:
+            return pc
 
     
 def _build_projection_matrix(intrinsic, near, far):
@@ -235,3 +241,5 @@ def _gl_ortho(left, right, bottom, top, near, far):
     ortho[2, 3] = -(far + near) / (far - near)
     return ortho
 
+CONFIG_FILE = os.path.dirname(os.path.abspath(__file__)) + "/../config/camera.gin"
+gin.parse_config_file(CONFIG_FILE)

@@ -59,7 +59,8 @@ class UR5(RobotBase):
         if self.trajectory_follower.state == FollowState.RUNNNING:
             sef_point = self.trajectory_follower.get_control_point(self.time)
             self.set_angle[0] = sef_point.positions
-        
+        end_pos, end_orn = self.get_end_state()
+        self.camera.update_pose(end_pos, end_orn)
         
     def pub_ros_info(self):
         self.joint_tra_action_server .update_current_state(self.joint_arm_info ["positions"], self.joint_arm_info ["velocities"])
