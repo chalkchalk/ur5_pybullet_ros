@@ -24,6 +24,7 @@ doc/
 
 # Catkin generated files
 catkin_generated/
+.catkin_tools/
 
 .vscode/
 __pycache__/

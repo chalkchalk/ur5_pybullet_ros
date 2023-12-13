@@ -1,5 +1,0 @@
-ur5_moveit
-/root/docker_mount/ur5_ros_pybullet/devel/.private/ur5_moveit/cmake.lock /root/docker_mount/ur5_ros_pybullet/devel/./cmake.lock
-/root/docker_mount/ur5_ros_pybullet/devel/.private/ur5_moveit/share/ur5_moveit/cmake/ur5_moveitConfig-version.cmake /root/docker_mount/ur5_ros_pybullet/devel/share/ur5_moveit/cmake/ur5_moveitConfig-version.cmake
-/root/docker_mount/ur5_ros_pybullet/devel/.private/ur5_moveit/share/ur5_moveit/cmake/ur5_moveitConfig.cmake /root/docker_mount/ur5_ros_pybullet/devel/share/ur5_moveit/cmake/ur5_moveitConfig.cmake
-/root/docker_mount/ur5_ros_pybullet/devel/.private/ur5_moveit/lib/pkgconfig/ur5_moveit.pc /root/docker_mount/ur5_ros_pybullet/devel/lib/pkgconfig/ur5_moveit.pc
