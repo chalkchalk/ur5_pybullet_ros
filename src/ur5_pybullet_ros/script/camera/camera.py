@@ -77,6 +77,7 @@ class Camera(object):
     """
 
     def __init__(self, camera_config, near, far, relative_offset, downsample_resolution):
+        camera_config = os.path.dirname(os.path.abspath(__file__)) + "/" + camera_config
         with open(camera_config, "r") as j:
             config = json.load(j)
         camera_intrinsic = CameraIntrinsic.from_dict(config["intrinsic"])
