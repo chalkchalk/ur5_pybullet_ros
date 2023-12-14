@@ -13,7 +13,7 @@ ROS_CLOCK_TOPIC = "clock"
 @gin.configurable
 class Environment():
     def __init__(self, setRealTimeSimulation, dt, realtime_factor):
-        self.client = p.connect(p.GUI)
+        self.client = p.connect(p.GUI) # p.connect(p.DIRECT)
         self.robot = UR5()
         p.setRealTimeSimulation(setRealTimeSimulation)
         p.setGravity(0, 0, -9.81)
@@ -31,13 +31,9 @@ class Environment():
         self.time += self.dt
         self.ros_wrapper.ros_time = self.time
         self.ros_wrapper.publish_msg(ROS_CLOCK_TOPIC, ros_wrapper.ros_msg.ROSClock(self.time))
-
         action = self.robot.set_angle[0]
         self.robot.apply_control(action, "joint")
         p.stepSimulation()
-        
-        
-        
         end_time = time.time()
         elapsed_time = end_time - start_time
         if self.dt / self.realtime_factor - elapsed_time > 0:

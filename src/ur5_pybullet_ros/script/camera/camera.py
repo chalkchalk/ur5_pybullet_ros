@@ -132,7 +132,7 @@ class Camera(object):
             self.update_camera_image_frame()
             # cv2.imshow("image", self.bgr)
             # key = cv2.waitKey(1)
-            time.sleep(0.02)
+            time.sleep(0.04)
     
     def update_camera_image_frame(self):
         wcT = self._bind_camera_to_end(self.pose, self.orien)

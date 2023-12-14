@@ -9,6 +9,8 @@ from ros_wrapper.joint_trajectory_action_server import  JointTrajectoryActionSer
 from controller.trajectory import get_trajectory_from_ros_msg
 from controller.trajectory_follower import TrajecyFollower, FollowState
 from camera.camera import Camera
+import time
+import threading
 
 ROS_SET_ANGLE_TOPIC = "set_angle"
 ROS_JOINT_STATES_TOPIC = "joint_states"
@@ -30,6 +32,12 @@ class UR5(RobotBase):
         self.joint_arm_info = {}
         self.camera = Camera()
         self.init_ros_interface()
+        self.joint_info_all = self.get_rotate_joint_info_all()
+        self.joint_arm_info = self.get_joint_obs()
+        self.ros_pub_thread = threading.Thread(
+            target=self.pub_ros_info_thread)
+        self.ros_pub_thread.setDaemon(True)
+        self.ros_pub_thread.start()
 
     def init_ros_interface(self):
         self.ros_wrapper = RosWrapper("ur5_pybullet")
@@ -41,7 +49,7 @@ class UR5(RobotBase):
         self.ros_wrapper.add_publisher(ROS_POINT_CLOUD_TOPIC, ROSDtype.POINT_CLOUD)
 
     def post_control(self):
-        self.pub_ros_info()
+        # self.pub_ros_info()
         end_pos, end_orn = self.get_end_state()
         self.camera.update_pose(end_pos, end_orn)
 
@@ -74,7 +82,15 @@ class UR5(RobotBase):
         self.ros_wrapper.publish_tf("ee_link", "camera_link", translation, rotation )
         
         # print(joint_info)
-        
+    
+    def pub_ros_info_thread(self):
+        last_time = 0
+        while True:
+            if last_time != self.ros_wrapper.ros_time:
+                self.pub_ros_info()
+            last_time = self.ros_wrapper.ros_time
+            time.sleep(0.01)
+    
     def move_gripper(self, open_length):
         open_angle = 0.715 - math.asin((open_length - 0.010) / 0.1143)  # angle calculation
 

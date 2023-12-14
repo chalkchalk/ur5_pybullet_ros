@@ -63,6 +63,7 @@ class RosWrapper:
         transform_stamped.transform.rotation.z = rotation[2]
         transform_stamped.transform.rotation.w = rotation[3]
         self.tf_broadcaster.sendTransform(transform_stamped)
+    
 
 if __name__ == "__main__":
     wrapper = RosWrapper("test_node")
