@@ -5,9 +5,61 @@
 <!-- =================================================================================== -->
 
 <robot name="ur5_robotiq_85" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- <property name="mesh_prefix" value="../meshes"/> -->
   <!--################################################
   ########              arm                    #######
   ####################################################-->
+
+  <link name="chassis_link">
+    <visual>
+      <geometry>
+        <box size="0.5 0.5 0.1"/>
+      </geometry>
+      <material name="LightGrey">
+        <color rgba="0.7 0.7 0.7 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.5 0.5 0.1"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="20.0"/>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <inertia ixx="0.05" ixy="0.0" ixz="0.0" iyy="0.05" iyz="0.0" izz="0.1"/>
+    </inertial>
+  </link>
+
+  <joint name="chassis_joint" type="fixed">
+    <parent link="chassis_link"/>
+    <child link="base_link"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.1"/>
+  </joint>
+
+  <link name="lidar_link">
+    <visual>
+      <geometry>
+        <cylinder length="0.02" radius="0.03"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0.2 0.2 0.5 1.0"/>
+      </material>
+    </visual>
+    <inertial>
+      <mass value="40.0"/>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <inertia ixx="0.05" ixy="0.0" ixz="0.0" iyy="0.05" iyz="0.0" izz="0.1"/>
+    </inertial>
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="chassis_link"/>
+    <child link="lidar_link"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.2 0.0 0.1"/>
+  </joint>
+
   <link name="base_link">
     <visual>
       <geometry>
@@ -28,6 +80,7 @@
       <inertia ixx="0.00443333156" ixy="0.0" ixz="0.0" iyy="0.00443333156" iyz="0.0" izz="0.0072"/>
     </inertial>
   </link>
+
   <joint name="shoulder_pan_joint" type="revolute">
     <parent link="base_link"/>
     <child link="shoulder_link"/>
@@ -544,6 +597,28 @@
   ####################################################-->
 
   <link name="world"/>
+  <link name="chassis_link_x">
+  <inertial>
+        <origin xyz="0 0 0 " rpy="0 0 0" />
+        <mass value="0" />
+        <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+        </inertial>
+  </link>
+  <link name="chassis_link_y">
+  <inertial>
+        <origin xyz="0 0 0 " rpy="0 0 0" />
+        <mass value="0" />
+        <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+        </inertial>
+  </link>
+  <link name="chassis_link_theta">
+  <inertial>
+        <origin xyz="0 0 0 " rpy="0 0 0" />
+        <mass value="0" />
+        <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+        </inertial>
+  </link>
+
   <!-- connect gripper to arm -->
   <joint name="robotiq_85_base_joint" type="fixed">
     <parent link="ee_link"/>
@@ -558,12 +633,36 @@
 <!--  </joint>-->
 
   <!-- connect arm to world -->
-  <joint name="world_arm_joint" type="fixed">
+  
+
+  <joint name="world_chassis_joint_x" type="prismatic">
     <parent link="world"/>
-    <child link="base_link"/>
+    <child link="chassis_link_x"/>
     <origin rpy="0.0 0.0 0" xyz="0 0 0"/>
+    <limit effort="5000" velocity="3" lower="-100" upper="100"/>
+    <axis xyz="1 0 0"/>
   </joint>
 
+  <joint name="world_chassis_joint_y" type="prismatic">
+    <parent link="chassis_link_x"/>
+    <child link="chassis_link_y"/>
+    <origin rpy="0.0 0.0 0" xyz="0 0 0"/>
+    <limit effort="5000" velocity="3" lower="-100" upper="100"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <joint name="world_chassis_joint_theta" type="continuous">
+    <parent link="chassis_link_y"/>
+    <child link="chassis_link_theta"/>
+    <origin rpy="0.0 0.0 0" xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <joint name="world_chassis_joint_fixed" type="fixed">
+    <parent link="chassis_link_theta"/>
+    <child link="chassis_link"/>
+    <origin rpy="0.0 0.0 0" xyz="0 0 0"/>
+  </joint>
 
 </robot>
 

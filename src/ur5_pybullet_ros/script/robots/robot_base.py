@@ -47,24 +47,25 @@ class RobotBase(object):
         self.eef_joint = eef_joint
         self.eef_id = 0
         
-        self.load()
-
-    def load(self):
-        self.__parse_joint_info__()
-        self.__post_load__()
-        # print(self.joints)
-
-
-    def __parse_joint_info__(self):
-        numJoints = p.getNumJoints(self.id)
-        jointInfo = namedtuple('jointInfo', 
-            ['id','name','type','damping','friction','lowerLimit','upperLimit','maxForce','maxVelocity','controllable'])
         self.joints = []
         self.arm_motor_ids = []
         self.joints_name = []
         
         self.rotate_joint_names = []
         self.rotate_joint_id = []
+        
+        self.load()
+
+    def load(self):
+        self.__parse_joint_info__()
+        self.__post_load__()
+        # print(self.joints)
+    
+    def __parse_joint_info__(self):
+        numJoints = p.getNumJoints(self.id)
+        jointInfo = namedtuple('jointInfo', 
+            ['id','name','type','damping','friction','lowerLimit','upperLimit','maxForce','maxVelocity','controllable'])
+        
         
         for i in range(numJoints):
             info = p.getJointInfo(self.id, i)
@@ -86,10 +87,10 @@ class RobotBase(object):
             if self.eef_joint == jointName:
                 self.eef_id = jointID
             
-            if jointType is not 4:
+            if jointType != 4:
                 self.rotate_joint_names.append(jointName)
                 self.rotate_joint_id.append(jointID)
-            # print(jointID, jointName)
+            print(jointID, jointName)
             
             
             self.joints_name.append(jointName)
@@ -178,6 +179,20 @@ class RobotBase(object):
             velocities.append(vel)
             torques.append(torque)
         return dict(id=id, positions=positions, velocities=velocities, torques=torques)
+    
+    def get_joint_id(self, joint_name):
+        ids = []
+        for name in joint_name:
+            id = -1
+            for joint in self.joints:
+                if name == joint.name:
+                    id = joint.id
+                    break
+            if id == -1:
+                print(name + " is not in the robot!")
+            ids.append(id)
+        return ids
+        
     
     def get_end_state(self):
         """Get the position and orientation of the end effector.

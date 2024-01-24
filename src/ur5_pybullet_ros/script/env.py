@@ -31,8 +31,9 @@ class Environment():
         self.time += self.dt
         self.ros_wrapper.ros_time = self.time
         self.ros_wrapper.publish_msg(ROS_CLOCK_TOPIC, ros_wrapper.ros_msg.ROSClock(self.time))
-        action = self.robot.set_angle[0]
+        action = self.robot.set_angle[0]    
         self.robot.apply_control(action, "joint")
+        self.robot.set_base_twist([0.0,0.5, 0.5])
         p.stepSimulation()
         end_time = time.time()
         elapsed_time = end_time - start_time
