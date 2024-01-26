@@ -9,7 +9,6 @@ Panels:
         - /TF1/Frames1
         - /PointCloud21
         - /LaserScan1
-        - /LaserScan1/Status1
       Splitter Ratio: 0.5
     Tree Height: 555
   - Class: rviz/Selection
@@ -75,18 +74,6 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        chassis_link_theta:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        chassis_link_x:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        chassis_link_y:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         ee_link:
           Alpha: 1
           Show Axes: false
@@ -167,10 +154,6 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        world:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         wrist_1_link:
           Alpha: 1
           Show Axes: false
@@ -205,12 +188,6 @@ Visualization Manager:
           Value: true
         chassis_link:
           Value: true
-        chassis_link_theta:
-          Value: true
-        chassis_link_x:
-          Value: true
-        chassis_link_y:
-          Value: true
         ee_link:
           Value: true
         forearm_link:
@@ -226,6 +203,8 @@ Visualization Manager:
         left_outer_knuckle:
           Value: false
         lidar_link:
+          Value: true
+        odom:
           Value: true
         right_inner_finger:
           Value: false
@@ -243,8 +222,6 @@ Visualization Manager:
           Value: true
         upper_arm_link:
           Value: true
-        world:
-          Value: true
         wrist_1_link:
           Value: true
         wrist_2_link:
@@ -258,38 +235,35 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        world:
-          chassis_link_x:
-            chassis_link_y:
-              chassis_link_theta:
-                chassis_link:
-                  base_link:
-                    shoulder_link:
-                      upper_arm_link:
-                        forearm_link:
-                          wrist_1_link:
-                            wrist_2_link:
-                              wrist_3_link:
-                                ee_link:
-                                  camera_link:
-                                    {}
-                                  robotiq_arg2f_base_link:
-                                    left_inner_knuckle:
+        odom:
+          chassis_link:
+            base_link:
+              shoulder_link:
+                upper_arm_link:
+                  forearm_link:
+                    wrist_1_link:
+                      wrist_2_link:
+                        wrist_3_link:
+                          ee_link:
+                            camera_link:
+                              {}
+                            robotiq_arg2f_base_link:
+                              left_inner_knuckle:
+                                {}
+                              left_outer_knuckle:
+                                left_outer_finger:
+                                  left_inner_finger:
+                                    left_inner_finger_pad:
                                       {}
-                                    left_outer_knuckle:
-                                      left_outer_finger:
-                                        left_inner_finger:
-                                          left_inner_finger_pad:
-                                            {}
-                                    right_inner_knuckle:
+                              right_inner_knuckle:
+                                {}
+                              right_outer_knuckle:
+                                right_outer_finger:
+                                  right_inner_finger:
+                                    right_inner_finger_pad:
                                       {}
-                                    right_outer_knuckle:
-                                      right_outer_finger:
-                                        right_inner_finger:
-                                          right_inner_finger_pad:
-                                            {}
-                  lidar_link:
-                    {}
+            lidar_link:
+              {}
       Update Interval: 0
       Value: true
     - Alpha: 0.6000000238418579
@@ -352,7 +326,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: world
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
