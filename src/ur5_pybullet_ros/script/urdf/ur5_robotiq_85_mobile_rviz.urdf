@@ -562,10 +562,6 @@
     <!--################################################
   ########          connect model                #####
   ####################################################-->
-	<link name="world"/>
-	<link name="chassis_link_x"/>
-	<link name="chassis_link_y"/>
-	<link name="chassis_link_theta"/>
     <!-- connect gripper to arm -->
     <joint name="robotiq_85_base_joint" type="fixed">
         <parent link="ee_link" />
@@ -578,34 +574,6 @@
     <!--    <origin rpy="-1.57 1.57 -1.57" xyz="0.0 0.0 0.0"/>-->
     <!--  </joint>-->
     <!-- connect arm to world -->
-	<joint name="world_chassis_joint_x" type="prismatic">
-    <parent link="world"/>
-    <child link="chassis_link_x"/>
-    <origin rpy="0.0 0.0 0" xyz="0 0 0"/>
-    <limit effort="5000" velocity="3" lower="-100" upper="100"/>
-    <axis xyz="1 0 0"/>
-  </joint>
-
-  <joint name="world_chassis_joint_y" type="prismatic">
-    <parent link="chassis_link_x"/>
-    <child link="chassis_link_y"/>
-    <origin rpy="0.0 0.0 0" xyz="0 0 0"/>
-    <limit effort="5000" velocity="3" lower="-100" upper="100"/>
-    <axis xyz="0 1 0"/>
-  </joint>
-
-  <joint name="world_chassis_joint_theta" type="continuous">
-    <parent link="chassis_link_y"/>
-    <child link="chassis_link_theta"/>
-    <origin rpy="0.0 0.0 0" xyz="0 0 0"/>
-    <axis xyz="0 0 1"/>
-  </joint>
-
-  <joint name="world_chassis_joint_fixed" type="fixed">
-    <parent link="chassis_link_theta"/>
-    <child link="chassis_link"/>
-    <origin rpy="0.0 0.0 0" xyz="0 0 0"/>
-  </joint>
 
     <transmission name="trans_shoulder_pan_joint">
         <type>transmission_interface/SimpleTransmission</type>

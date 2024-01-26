@@ -87,7 +87,7 @@ class RobotBase(object):
             if self.eef_joint == jointName:
                 self.eef_id = jointID
             
-            if jointType != 4:
+            if jointType == 0 and jointName!="world_chassis_joint_theta":
                 self.rotate_joint_names.append(jointName)
                 self.rotate_joint_id.append(jointID)
             print(jointID, jointName)

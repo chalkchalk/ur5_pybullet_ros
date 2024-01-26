@@ -9,6 +9,7 @@ Panels:
         - /TF1/Frames1
         - /PointCloud21
         - /LaserScan1
+        - /LaserScan1/Status1
       Splitter Ratio: 0.5
     Tree Height: 555
   - Class: rviz/Selection
@@ -342,7 +343,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.019999999552965164
       Style: Points
-      Topic: /ur5_pybullet/scan
+      Topic: /scan
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -375,7 +376,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 14.114477157592773
+      Distance: 7.382696151733398
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -391,9 +392,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8003984689712524
+      Pitch: 0.7853981852531433
       Target Frame: <Fixed Frame>
-      Yaw: 0.8454065322875977
+      Yaw: 0.7853981852531433
     Saved: ~
 Window Geometry:
   Displays:
@@ -411,5 +412,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 2427
+  X: 720
   Y: 27
