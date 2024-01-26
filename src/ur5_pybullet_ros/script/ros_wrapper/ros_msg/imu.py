@@ -5,9 +5,10 @@ import rospy
 
 class ImuData(ROSMsgBase):
     rosdtype = Imu
-    def __init__(self, quat, ang_vel, lin_acc):
+    def __init__(self, quat, ang_vel, lin_acc, frame_id):
         super().__init__()
         self.imu = Imu()
+        self.imu.header.frame_id = frame_id
         self.imu.orientation.x = quat[0]
         self.imu.orientation.y = quat[1]
         self.imu.orientation.z = quat[2]
@@ -22,6 +23,5 @@ class ImuData(ROSMsgBase):
     @classmethod
     def transform_rosmsg(cls, data, ros_time, frame_id=""):
         ros_msg = data.imu
-        ros_msg.header.frame_id = frame_id
         ros_msg.header.stamp = rospy.Time.from_sec(ros_time)
         return ros_msg

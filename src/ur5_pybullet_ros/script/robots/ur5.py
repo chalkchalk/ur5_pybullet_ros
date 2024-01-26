@@ -11,7 +11,7 @@ from controller.trajectory import get_trajectory_from_ros_msg
 from controller.trajectory_follower import TrajecyFollower, FollowState
 from camera.camera import Camera
 from robots.chassis import Chassis
-from lidar.lidar import Lidar
+
 import time
 import threading
 
@@ -22,7 +22,7 @@ ROS_JOINT_ANGLE_TOPIC = "joint_angles"
 
 @gin.configurable
 class UR5(RobotBase):
-    def __init__(self, urdf_file, base_pos, base_ori, inital_angle, gripper_range, arm_joint, eef_joint, chassis_joint, lidar_joint):
+    def __init__(self, urdf_file, base_pos, base_ori, inital_angle, gripper_range, arm_joint, eef_joint, chassis_joint):
         self.name = "UR5"
         urdf_file = os.path.dirname(os.path.abspath(__file__)) + "/../urdf/" + urdf_file
         super().__init__(self.name, urdf_file, base_pos, base_ori, inital_angle, gripper_range, arm_joint, eef_joint)
@@ -31,7 +31,6 @@ class UR5(RobotBase):
         self.set_angle = [inital_angle] # we use list to make it a mutable variable, so the callback of ros can change this value naturely
         self.init_ros_interface()
         self.chassis = Chassis(self.ros_wrapper, self.id, self.get_joint_id(chassis_joint))
-        self.lidar = Lidar(self.ros_wrapper, self.id, self.get_joint_id([lidar_joint])[0])
         self.camera = Camera(self.ros_wrapper, self.id, self.get_joint_id([eef_joint])[0])
         self.trajectory_follower = TrajecyFollower(self. arm_joint)
         self.joint_info_all = {}
@@ -105,6 +104,7 @@ class UR5(RobotBase):
 
     def publish_sensor(self):
         self.chassis.publish_odom()
+        self.chassis.publish_imu()
         pass
 
 CONFIG_FILE = (os.path.dirname(os.path.abspath(__file__)) + "/../config/ur5_default.gin")

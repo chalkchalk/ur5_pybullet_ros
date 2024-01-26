@@ -13,16 +13,15 @@ ROS_CLOCK_TOPIC = "clock"
 class Environment():
     def __init__(self, setRealTimeSimulation, dt, realtime_factor):
         self.client = p.connect(p.GUI) # p.connect(p.DIRECT)
-        self.robot = UR5()
         p.setRealTimeSimulation(setRealTimeSimulation)
         p.setGravity(0, 0, -9.81)
         p.setTimeStep(dt)
+        self.robot = UR5()
         self.dt = dt
         self.time = 0.0
         self.realtime_factor = realtime_factor
         self.ros_wrapper = self.robot.ros_wrapper
         self.ros_wrapper.add_publisher(ROS_CLOCK_TOPIC, ROSDtype.CLOCK, False)
-        # p.resetDebugVisualizerCamera(1.674, 70, -50.8, [0, 0, 0])+
         self.load_scenes()
 
     def step(self):
