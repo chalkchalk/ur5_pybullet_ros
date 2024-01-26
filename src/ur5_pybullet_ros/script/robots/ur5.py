@@ -4,12 +4,14 @@ import pybullet as p
 import gin
 import math
 from ros_wrapper.ros_wrapper import RosWrapper
-from ros_wrapper.ros_msg import ROSDtype, RobotJointState
+from ros_wrapper.ros_msg.ros_dtype import ROSDtype
+from ros_wrapper.ros_msg.robot_joint_state import RobotJointState
 from ros_wrapper.joint_trajectory_action_server import  JointTrajectoryActionServer, ActionState
 from controller.trajectory import get_trajectory_from_ros_msg
 from controller.trajectory_follower import TrajecyFollower, FollowState
 from camera.camera import Camera
 from robots.chassis import Chassis
+from lidar.lidar import Lidar
 import time
 import threading
 
@@ -21,18 +23,19 @@ ROS_POINT_CLOUD_TOPIC = "point_cloud"
 
 @gin.configurable
 class UR5(RobotBase):
-    def __init__(self, urdf_file, base_pos, base_ori, inital_angle, gripper_range, arm_joint, eef_joint, chassis_joint):
+    def __init__(self, urdf_file, base_pos, base_ori, inital_angle, gripper_range, arm_joint, eef_joint, chassis_joint, lidar_joint):
         self.name = "UR5"
         urdf_file = os.path.dirname(os.path.abspath(__file__)) + "/../urdf/" + urdf_file
         super().__init__(self.name, urdf_file, base_pos, base_ori, inital_angle, gripper_range, arm_joint, eef_joint)
         self.chassis = Chassis(self.id, self.get_joint_id(chassis_joint))
+        self.lidar = Lidar(self.id, self.get_joint_id([lidar_joint])[0])
         self.reset()
         self.time = 0
         self.set_angle = [inital_angle] # we use list to make it a mutable variable, so the callback of ros can change this value naturely
         self.trajectory_follower = TrajecyFollower(self. arm_joint)
         self.joint_info_all = {}
         self.joint_arm_info = {}
-        self.camera = Camera()
+        self.camera = Camera(self.id, self.get_joint_id([eef_joint])[0])
         self.init_ros_interface()
         self.joint_info_all = self.get_rotate_joint_info_all()
         self.joint_arm_info = self.get_joint_obs()
@@ -52,8 +55,9 @@ class UR5(RobotBase):
 
     def post_control(self):
         # self.pub_ros_info()
-        end_pos, end_orn = self.get_end_state()
-        self.camera.update_pose(end_pos, end_orn)
+        # end_pos, end_orn = self.get_end_state()
+        # self.camera.update_pose(end_pos, end_orn)
+        pass
 
     def pre_control(self):
         self.time = self.ros_wrapper.ros_time
@@ -69,8 +73,6 @@ class UR5(RobotBase):
         if self.trajectory_follower.state == FollowState.RUNNNING:
             sef_point = self.trajectory_follower.get_control_point(self.time)
             self.set_angle[0] = sef_point.positions
-        end_pos, end_orn = self.get_end_state()
-        self.camera.update_pose(end_pos, end_orn)
         
     def pub_ros_info(self):
         self.joint_tra_action_server .update_current_state(self.joint_arm_info ["positions"], self.joint_arm_info ["velocities"])
@@ -98,6 +100,10 @@ class UR5(RobotBase):
     
     def set_base_twist(self, twist):
         self.chassis.set_twist(twist)
+    
+    def update_sensor(self):
+        # self.lidar.update_rays()
+        pass
 
 
 CONFIG_FILE = (os.path.dirname(os.path.abspath(__file__)) + "/../config/ur5_default.gin")

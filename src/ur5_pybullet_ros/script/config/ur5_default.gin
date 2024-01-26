@@ -7,4 +7,5 @@ UR5.gripper_range = [0, 0.085]
 UR5.arm_joint = ['shoulder_pan_joint', 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']
 UR5.chassis_joint = ['world_chassis_joint_x', 'world_chassis_joint_y', 'world_chassis_joint_theta', 'chassis_joint']
 UR5.eef_joint = 'ee_fixed_joint'
+UR5.lidar_joint = 'lidar_joint'
 

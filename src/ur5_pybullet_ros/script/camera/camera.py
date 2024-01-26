@@ -76,11 +76,13 @@ class Camera(object):
         intrinsic: The camera intrinsic parameters.
     """
 
-    def __init__(self, camera_config, near, far, relative_offset, downsample_resolution):
+    def __init__(self, robot_id, ee_id, camera_config, near, far, relative_offset, downsample_resolution):
         camera_config = os.path.dirname(os.path.abspath(__file__)) + "/" + camera_config
         with open(camera_config, "r") as j:
             config = json.load(j)
         camera_intrinsic = CameraIntrinsic.from_dict(config["intrinsic"])
+        self.robot_id = robot_id
+        self.ee_id = ee_id
         self.intrinsic = camera_intrinsic
         self.near = near
         self.far = far
@@ -133,9 +135,10 @@ class Camera(object):
             self.update_camera_image_frame()
             # cv2.imshow("image", self.bgr)
             # key = cv2.waitKey(1)
-            time.sleep(0.04)
+            time.sleep(0.1)
     
     def update_camera_image_frame(self):
+        self.update_pose()
         wcT = self._bind_camera_to_end(self.pose, self.orien)
         cwT = np.linalg.inv(wcT)
 
@@ -145,10 +148,11 @@ class Camera(object):
         self.rgb = frame.color_image()  # 这里以显示rgb图像为例, frame还包含了深度图, 也可以转化为点云
         self.bgr = np.ascontiguousarray(self.rgb[:, :, ::-1])  # flip the rgb channel
         self.point_cloud = frame.point_cloud(self.downsample_resolution)
-            
-    def update_pose(self, pose, orien):
-        self.pose = pose
-        self.orien = orien
+
+    def update_pose(self):
+        end_state = p.getLinkState(self.robot_id, self.ee_id)
+        self.pose = end_state[0]
+        self.orien = end_state[1]
     
     def _bind_camera_to_end(self, end_pos, end_orn):
         """设置相机坐标系与末端坐标系的相对位置

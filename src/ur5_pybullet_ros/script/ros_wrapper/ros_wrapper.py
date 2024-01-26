@@ -1,9 +1,12 @@
 import rospy
 import numpy as np
-from ros_wrapper.ros_msg import ROSDtype, RobotJointState, ImuData, data_to_ros_msg
+from ros_wrapper.ros_msg.ros_dtype import ROSDtype
 import time
 import tf2_ros
 import geometry_msgs.msg
+
+def data_to_ros_msg(data, dtype:ROSDtype, ros_time, frame_id=""):
+    return dtype.value.transform_rosmsg(data, ros_time, frame_id)
 
 class RosWrapper:
     def __init__(self, rosnode_name): #if rosnode_name is empty, ros_init will not be called, since only one node for each script
@@ -21,7 +24,7 @@ class RosWrapper:
         full_topic = topic
         if use_namespace:
             full_topic = self.rosnode_name + '/' + topic
-        pub = rospy.Publisher(full_topic, dtype.value, queue_size=queue)
+        pub = rospy.Publisher(full_topic, dtype.value.rosdtype, queue_size=queue)
         self.publishers[topic] = [dtype, pub]
 
     def add_subscriber(self, topic, dtype, data_handle, use_namespace=True):
@@ -34,7 +37,7 @@ class RosWrapper:
         if use_namespace:
             full_topic = self.rosnode_name + '/' + topic
         full_topic = "/" + full_topic
-        rospy.Subscriber(full_topic, dtype.value, self.topic_callback)
+        rospy.Subscriber(full_topic, dtype.value.rosdtype, self.topic_callback)
         self.subscribers[full_topic] = [dtype, data_handle]
         
     def topic_callback(self, msg):
