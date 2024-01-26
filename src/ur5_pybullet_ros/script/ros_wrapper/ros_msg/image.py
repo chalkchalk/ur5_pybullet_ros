@@ -6,7 +6,7 @@ from cv_bridge import CvBridge
 class Image(ROSMsgBase):
     rosdtype = ImageROS
     def __init__(self): # just us np.array or list
-        pass
+        super().__init__()
     
     @classmethod
     def transform_rosmsg(cls, data, ros_time, frame_id=""):

@@ -5,6 +5,7 @@ from ros_wrapper.ros_msg.ros_msg_base import ROSMsgBase
 class RobotJointState(ROSMsgBase):
     rosdtype = JointState
     def __init__(self, name, pos, vel, tor):
+        super().__init__()
         self.joint_state = JointState()
         self.joint_state.name = name
         self.joint_state.position = pos

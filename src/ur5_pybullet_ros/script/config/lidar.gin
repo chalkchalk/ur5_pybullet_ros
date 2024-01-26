@@ -1,4 +1,6 @@
 Lidar.num_of_rays = 64
 Lidar.min_range = 0.1
 Lidar.max_range = 3.0
+Lidar.min_angle = -1.5707963
+Lidar.max_angle = 1.5707963
 Lidar.debug_beams = False

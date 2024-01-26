@@ -6,6 +6,7 @@ from typing import Type
 class ImuData(ROSMsgBase):
     rosdtype = Imu
     def __init__(self, quat, ang_vel, lin_acc):
+        super().__init__()
         self.imu = Imu()
         self.imu.orientation.x = quat[0]
         self.imu.orientation.y = quat[1]

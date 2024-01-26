@@ -7,7 +7,7 @@ from ros_wrapper.ros_msg.ros_msg_base import ROSMsgBase
 class ROSClock(ROSMsgBase):
     rosdtype = Clock
     def __init__(self, time):
-        pass
+        super().__init__()
         self.ros_clock = Clock()
         self.ros_clock.clock = rospy.Time.from_sec(time)
         # header=Header(stamp=rospy.Time.from_sec(time))

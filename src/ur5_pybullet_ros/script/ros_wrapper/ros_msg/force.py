@@ -6,7 +6,7 @@ import rospy
 class Force(ROSMsgBase):
     rosdtype = WrenchStamped
     def __init__(self): # just us np.array or list
-        pass
+        super().__init__()
     
     @classmethod
     def transform_rosmsg(cls, data, ros_time, frame_id=""):

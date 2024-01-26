@@ -21,7 +21,7 @@ BIT_MOVE_8 = 2**8
 class PointCloud(ROSMsgBase): #just use 
     rosdtype = PointCloud2
     def __init__(self):
-        pass
+        super().__init__()
     
     @classmethod
     def transform_rosmsg(cls, data, ros_time, frame_id=""):

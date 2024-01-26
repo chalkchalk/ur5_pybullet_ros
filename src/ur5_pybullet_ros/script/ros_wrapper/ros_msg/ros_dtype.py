@@ -8,6 +8,7 @@ from ros_wrapper.ros_msg.float import Float
 from ros_wrapper.ros_msg.force import Force
 from ros_wrapper.ros_msg.wrench import Wrench
 from ros_wrapper.ros_msg.image import Image
+from ros_wrapper.ros_msg.laser_scan import LaserScan
 
 class ROSDtype(Enum):
     FLOAT = Float
@@ -19,3 +20,4 @@ class ROSDtype(Enum):
     CLOCK  = ROSClock
     IMAGE = Image
     POINT_CLOUD = PointCloud
+    LASER_SCAN = LaserScan

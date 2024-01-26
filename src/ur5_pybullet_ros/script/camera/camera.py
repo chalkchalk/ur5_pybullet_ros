@@ -8,8 +8,11 @@ import threading
 from scipy.spatial.transform import Rotation as R
 import gin
 import os
+from ros_wrapper.ros_msg.ros_dtype import ROSDtype
 # some codes are copied from https://github.com/ethz-asl/vgn.git
 
+ROS_IMAGE_TOPIC = "camera"
+ROS_POINT_CLOUD_TOPIC = "point_cloud"
 
 class CameraIntrinsic(object):
     """Intrinsic parameters of a pinhole camera model.
@@ -76,13 +79,16 @@ class Camera(object):
         intrinsic: The camera intrinsic parameters.
     """
 
-    def __init__(self, robot_id, ee_id, camera_config, near, far, relative_offset, downsample_resolution):
+    def __init__(self, ros_wrapper, robot_id, ee_id, camera_config, near, far, relative_offset, downsample_resolution):
         camera_config = os.path.dirname(os.path.abspath(__file__)) + "/" + camera_config
         with open(camera_config, "r") as j:
             config = json.load(j)
         camera_intrinsic = CameraIntrinsic.from_dict(config["intrinsic"])
+        self.ros_wrapper = ros_wrapper
         self.robot_id = robot_id
         self.ee_id = ee_id
+        self.ee_frame = p.getJointInfo(robot_id,self.ee_id )[12].decode("utf-8") 
+        self.camera_frame = "camera_link"
         self.intrinsic = camera_intrinsic
         self.near = near
         self.far = far
@@ -95,6 +101,7 @@ class Camera(object):
         self.point_cloud = None
         self.relative_offset = relative_offset # 相机原点相对于末端执行器局部坐标系的偏移量
         self.downsample_resolution = downsample_resolution
+        self.init_ros_wrapper()
         # thread for updating camera image
         self.update_camera_image_thread = threading.Thread(
             target=self.update_camera_image)
@@ -102,7 +109,9 @@ class Camera(object):
         self.update_camera_image_thread.start()
         
         
-
+    def init_ros_wrapper(self):
+        self.ros_wrapper.add_publisher(ROS_IMAGE_TOPIC, ROSDtype.IMAGE)
+        self.ros_wrapper.add_publisher(ROS_POINT_CLOUD_TOPIC, ROSDtype.POINT_CLOUD)
 
     def render(self, extrinsic):
         """Render synthetic RGB and depth images.
@@ -139,6 +148,7 @@ class Camera(object):
     
     def update_camera_image_frame(self):
         self.update_pose()
+        self.publish_tf()
         wcT = self._bind_camera_to_end(self.pose, self.orien)
         cwT = np.linalg.inv(wcT)
 
@@ -148,12 +158,21 @@ class Camera(object):
         self.rgb = frame.color_image()  # 这里以显示rgb图像为例, frame还包含了深度图, 也可以转化为点云
         self.bgr = np.ascontiguousarray(self.rgb[:, :, ::-1])  # flip the rgb channel
         self.point_cloud = frame.point_cloud(self.downsample_resolution)
+        self.publish_data()
 
     def update_pose(self):
         end_state = p.getLinkState(self.robot_id, self.ee_id)
         self.pose = end_state[0]
         self.orien = end_state[1]
     
+    def publish_tf(self):
+        translation, rotation = self.get_cam_offset()
+        self.ros_wrapper.publish_tf(self.ee_frame, self.camera_frame, translation, rotation )
+    
+    def publish_data(self):
+        self.ros_wrapper.publish_msg(ROS_IMAGE_TOPIC, self.bgr)
+        self.ros_wrapper.publish_msg(ROS_POINT_CLOUD_TOPIC, self.point_cloud, self.camera_frame)
+
     def _bind_camera_to_end(self, end_pos, end_orn):
         """设置相机坐标系与末端坐标系的相对位置
         

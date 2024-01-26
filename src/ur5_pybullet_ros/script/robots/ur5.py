@@ -18,8 +18,7 @@ import threading
 ROS_SET_ANGLE_TOPIC = "set_angle"
 ROS_JOINT_STATES_TOPIC = "joint_states"
 ROS_JOINT_ANGLE_TOPIC = "joint_angles"
-ROS_IMAGE_TOPIC = "camera"
-ROS_POINT_CLOUD_TOPIC = "point_cloud"
+
 
 @gin.configurable
 class UR5(RobotBase):
@@ -27,16 +26,16 @@ class UR5(RobotBase):
         self.name = "UR5"
         urdf_file = os.path.dirname(os.path.abspath(__file__)) + "/../urdf/" + urdf_file
         super().__init__(self.name, urdf_file, base_pos, base_ori, inital_angle, gripper_range, arm_joint, eef_joint)
-        self.chassis = Chassis(self.id, self.get_joint_id(chassis_joint))
-        self.lidar = Lidar(self.id, self.get_joint_id([lidar_joint])[0])
         self.reset()
         self.time = 0
         self.set_angle = [inital_angle] # we use list to make it a mutable variable, so the callback of ros can change this value naturely
+        self.init_ros_interface()
+        self.chassis = Chassis(self.id, self.get_joint_id(chassis_joint))
+        self.lidar = Lidar(self.ros_wrapper, self.id, self.get_joint_id([lidar_joint])[0])
+        self.camera = Camera(self.ros_wrapper, self.id, self.get_joint_id([eef_joint])[0])
         self.trajectory_follower = TrajecyFollower(self. arm_joint)
         self.joint_info_all = {}
         self.joint_arm_info = {}
-        self.camera = Camera(self.id, self.get_joint_id([eef_joint])[0])
-        self.init_ros_interface()
         self.joint_info_all = self.get_rotate_joint_info_all()
         self.joint_arm_info = self.get_joint_obs()
         self.ros_pub_thread = threading.Thread(
@@ -50,8 +49,7 @@ class UR5(RobotBase):
         self.ros_wrapper.add_subscriber(ROS_SET_ANGLE_TOPIC, ROSDtype.FLOAT_ARRAY, self.set_angle)
         self.ros_wrapper.add_publisher(ROS_JOINT_STATES_TOPIC, ROSDtype.JOINT_STATE, False)
         self.ros_wrapper.add_publisher(ROS_JOINT_ANGLE_TOPIC, ROSDtype.FLOAT_ARRAY)
-        self.ros_wrapper.add_publisher(ROS_IMAGE_TOPIC, ROSDtype.IMAGE)
-        self.ros_wrapper.add_publisher(ROS_POINT_CLOUD_TOPIC, ROSDtype.POINT_CLOUD)
+        
 
     def post_control(self):
         # self.pub_ros_info()
@@ -78,12 +76,10 @@ class UR5(RobotBase):
         self.joint_tra_action_server .update_current_state(self.joint_arm_info ["positions"], self.joint_arm_info ["velocities"])
         joint_state = RobotJointState(self.rotate_joint_names, self.joint_info_all["positions"], self.joint_info_all["velocities"], self.joint_info_all["torques"])
         self.ros_wrapper.publish_msg(ROS_JOINT_STATES_TOPIC, joint_state)
-        if self.camera.bgr is not None:
-            self.ros_wrapper.publish_msg(ROS_IMAGE_TOPIC, self.camera.bgr)
-        if self.camera.point_cloud is not None:
-            self.ros_wrapper.publish_msg(ROS_POINT_CLOUD_TOPIC, self.camera.point_cloud, "camera_link")
-        translation, rotation = self.camera.get_cam_offset()
-        self.ros_wrapper.publish_tf("ee_link", "camera_link", translation, rotation )
+        # if self.camera.bgr is not None:
+        #     self.ros_wrapper.publish_msg(ROS_IMAGE_TOPIC, self.camera.bgr)
+        # if self.camera.point_cloud is not None:
+        #     self.ros_wrapper.publish_msg(ROS_POINT_CLOUD_TOPIC, self.camera.point_cloud, "camera_link")
         
         # print(joint_info)
     
