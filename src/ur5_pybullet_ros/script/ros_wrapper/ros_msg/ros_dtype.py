@@ -10,6 +10,7 @@ from ros_wrapper.ros_msg.wrench import Wrench
 from ros_wrapper.ros_msg.image import Image
 from ros_wrapper.ros_msg.laser_scan import LaserScan
 from ros_wrapper.ros_msg.twist import Twist
+from ros_wrapper.ros_msg.odom import Odom
 
 class ROSDtype(Enum):
     FLOAT = Float
@@ -23,3 +24,4 @@ class ROSDtype(Enum):
     POINT_CLOUD = PointCloud
     LASER_SCAN = LaserScan
     TWIST = Twist
+    ODOM = Odom

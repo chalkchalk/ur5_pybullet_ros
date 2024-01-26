@@ -37,7 +37,7 @@ class Lidar:
         
     
     def init_ros_wrapper(self):
-        self.ros_wrapper.add_publisher(ROS_LIDAR_TOPIC, ROSDtype.LASER_SCAN)
+        self.ros_wrapper.add_publisher(ROS_LIDAR_TOPIC, ROSDtype.LASER_SCAN, use_namespace=False)
         
 
     def init_rays(self):

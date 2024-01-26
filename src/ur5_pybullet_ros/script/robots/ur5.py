@@ -55,11 +55,12 @@ class UR5(RobotBase):
         # self.pub_ros_info()
         # end_pos, end_orn = self.get_end_state()
         # self.camera.update_pose(end_pos, end_orn)
-        self.update_sensor()
+        self.publish_sensor()
         pass
 
     def pre_control(self):
         self.time = self.ros_wrapper.ros_time
+        self.update_sensor()
         self.joint_info_all = self.get_rotate_joint_info_all()
         self.joint_arm_info = self.get_joint_obs()
         self.trajectory_follower.loop(self.joint_arm_info["positions"], self.joint_arm_info ["velocities"])
@@ -102,6 +103,9 @@ class UR5(RobotBase):
         # self.lidar.update_rays()
         pass
 
+    def publish_sensor(self):
+        self.chassis.publish_odom()
+        pass
 
 CONFIG_FILE = (os.path.dirname(os.path.abspath(__file__)) + "/../config/ur5_default.gin")
 gin.parse_config_file(CONFIG_FILE)
