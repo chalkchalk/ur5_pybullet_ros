@@ -76,7 +76,7 @@ class Lidar:
     def update_rays_thread_fun(self):
         while True:
             self.update_rays()
-            time.sleep(0.04)
+            time.sleep(0.1)
 
     def get_rays(self, position, orientation):
         ray_from = self.ray_from_init.copy()

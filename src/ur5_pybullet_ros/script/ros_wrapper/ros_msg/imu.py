@@ -1,7 +1,7 @@
 from sensor_msgs.msg import Imu
 from ros_wrapper.ros_msg.ros_msg_base import ROSMsgBase
 import rospy
-from typing import Type
+
 
 class ImuData(ROSMsgBase):
     rosdtype = Imu

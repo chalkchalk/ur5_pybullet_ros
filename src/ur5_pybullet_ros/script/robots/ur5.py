@@ -30,7 +30,7 @@ class UR5(RobotBase):
         self.time = 0
         self.set_angle = [inital_angle] # we use list to make it a mutable variable, so the callback of ros can change this value naturely
         self.init_ros_interface()
-        self.chassis = Chassis(self.id, self.get_joint_id(chassis_joint))
+        self.chassis = Chassis(self.ros_wrapper, self.id, self.get_joint_id(chassis_joint))
         self.lidar = Lidar(self.ros_wrapper, self.id, self.get_joint_id([lidar_joint])[0])
         self.camera = Camera(self.ros_wrapper, self.id, self.get_joint_id([eef_joint])[0])
         self.trajectory_follower = TrajecyFollower(self. arm_joint)
@@ -55,6 +55,7 @@ class UR5(RobotBase):
         # self.pub_ros_info()
         # end_pos, end_orn = self.get_end_state()
         # self.camera.update_pose(end_pos, end_orn)
+        self.update_sensor()
         pass
 
     def pre_control(self):

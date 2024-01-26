@@ -27,17 +27,19 @@ class RosWrapper:
         pub = rospy.Publisher(full_topic, dtype.value.rosdtype, queue_size=queue)
         self.publishers[topic] = [dtype, pub]
 
-    def add_subscriber(self, topic, dtype, data_handle, use_namespace=True):
+    def add_subscriber(self, topic, dtype, data_handle=None, use_namespace=True, callback=None):
         """
         subsribe to a specific topic to update value for data_handle.
         @param data_handle: NOTE: must be mutable objects, including list, dict, and set, bytearray
         """
-        assert type(data_handle) in (list, dict, set, bytearray), "data_handle must be mutable objects, including list, dict, and set, bytearray."
+        # assert type(data_handle) in (list, dict, set, bytearray), "data_handle must be mutable objects, including list, dict, and set, bytearray."
         full_topic = topic
         if use_namespace:
             full_topic = self.rosnode_name + '/' + topic
         full_topic = "/" + full_topic
-        rospy.Subscriber(full_topic, dtype.value.rosdtype, self.topic_callback)
+        if callback == None:
+            callback = self.topic_callback
+        rospy.Subscriber(full_topic, dtype.value.rosdtype, callback)
         self.subscribers[full_topic] = [dtype, data_handle]
         
     def topic_callback(self, msg):

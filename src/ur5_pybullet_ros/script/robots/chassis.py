@@ -1,14 +1,28 @@
 import pybullet as p
 import numpy as np
 from scipy.spatial.transform import Rotation
+from ros_wrapper.ros_msg.ros_dtype import ROSDtype
+
+ROS_CMD_VEL_TOPIC = "cmd_vel"
 
 class Chassis:
-    def __init__(self, robot_id, joint_id):
+    def __init__(self, ros_wrapper, robot_id, joint_id):
+        self.ros_wrapper = ros_wrapper
         self.robot_id = robot_id
         self.joint_id = joint_id # x y theta chassis
         self.twist = np.array([0.0, 0.0, 0.0]) # x y theta
         self.pos = np.array([0.0, 0.0, 0.0])
+        self.init_ros_wrapper()
     
+    def init_ros_wrapper(self):
+        self.ros_wrapper.add_subscriber(ROS_CMD_VEL_TOPIC, ROSDtype.TWIST, use_namespace=False, callback=self.cmdvel_callback)
+    
+    def cmdvel_callback(self, msg):
+        self.twist[0] = msg.linear.x
+        self.twist[1] = msg.linear.y
+        self.twist[2] = msg.angular.z
+        self.set_twist(self.twist)
+        
     def set_twist(self, twist):
         self.update_pos()
         self.twist = twist

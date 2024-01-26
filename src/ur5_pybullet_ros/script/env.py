@@ -32,7 +32,7 @@ class Environment():
         self.ros_wrapper.publish_msg(ROS_CLOCK_TOPIC, ROSDtype.CLOCK.value(self.time))
         action = self.robot.set_angle[0]    
         self.robot.apply_control(action, "joint")
-        self.robot.set_base_twist([0.0,0.0, 0.0])
+        # self.robot.set_base_twist([0.0,0.0, 0.3])
         p.stepSimulation()
         end_time = time.time()
         elapsed_time = end_time - start_time
@@ -44,6 +44,10 @@ class Environment():
         p.loadURDF('plane.urdf', [0, 0, 0], [0, 0, 0, 1])
         table1 = p.loadURDF('table/table.urdf', [0, -0.5, -0.2], [0, 0, 0, 1])
         cube_small = p.loadURDF('cube_small.urdf', [0.0, -0.6, 0.6], [0, 0, 0, 1], globalScaling = 5.0)
+        p.loadURDF('cube.urdf', [-1, 2, 0.6], [0, 0, 0, 1], globalScaling = 0.5)
+        p.loadURDF('cube.urdf', [-3.9, 4, 0.6], [0, 0, 0, 1], globalScaling = 0.5)
+        p.loadURDF('cube.urdf', [-2.6, -2, 0.6], [0, 0, 0, 1], globalScaling = 0.5)
+        p.loadURDF('cube.urdf', [-5, 0, 0.6], [0, 0, 0, 1], globalScaling = 1)
         
 CONFIG_FILE = os.path.dirname(os.path.abspath(__file__)) + "/config/env_default.gin"
 gin.parse_config_file(CONFIG_FILE)

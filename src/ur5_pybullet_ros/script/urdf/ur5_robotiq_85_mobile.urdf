@@ -35,7 +35,7 @@
   <joint name="chassis_joint" type="fixed">
     <parent link="chassis_link"/>
     <child link="base_link"/>
-    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.1"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.06"/>
   </joint>
 
   <link name="lidar_link">
@@ -57,7 +57,7 @@
   <joint name="lidar_joint" type="fixed">
     <parent link="chassis_link"/>
     <child link="lidar_link"/>
-    <origin rpy="0.0 0.0 0.0" xyz="0.2 0.0 0.1"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.21 0.0 0.06"/>
   </joint>
 
   <link name="base_link">

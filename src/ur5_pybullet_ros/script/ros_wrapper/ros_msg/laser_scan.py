@@ -13,8 +13,8 @@ class LaserScan(ROSMsgBase):
         self.lisar_scan.angle_max = angle_max
         self.lisar_scan.angle_increment = (angle_max - angle_min) / len(ray_data)
         self.lisar_scan.header.frame_id = frame_id
-        self.lisar_scan.time_increment = 0.01 # ?
-        self.lisar_scan.scan_time = 0.1 # 10 hz
+        self.lisar_scan.time_increment = 0.0 # ?
+        self.lisar_scan.scan_time = 0.0 # 10 hz
         self.rays_data = ray_data
     
     @classmethod
