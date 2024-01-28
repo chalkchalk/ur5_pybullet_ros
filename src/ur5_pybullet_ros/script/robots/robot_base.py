@@ -7,7 +7,7 @@ class RobotBase(object):
     The base class for robots
     """
 
-    def __init__(self, name, urdf_file, pos, ori, inital_angle, gripper_range, arm_joint, eef_joint):
+    def __init__(self, name, urdf_file, pos, ori, inital_angle, gripper_range, arm_joint, eef_joint, gripper_joint):
         """
         Arguments:
             pos: [x y z]
@@ -45,6 +45,7 @@ class RobotBase(object):
         self.gripper_range = gripper_range
         self.arm_joint = arm_joint
         self.eef_joint = eef_joint
+        self.gripper_joint = gripper_joint
         self.eef_id = 0
         
         self.joints = []
@@ -86,15 +87,17 @@ class RobotBase(object):
             self.joints.append(info)
             if self.eef_joint == jointName:
                 self.eef_id = jointID
-            
+            if self.gripper_joint[0] == jointName:
+                self.gripper_id = jointID
             if jointType == 0 and jointName!="world_chassis_joint_theta":
                 self.rotate_joint_names.append(jointName)
                 self.rotate_joint_id.append(jointID)
-            print(jointID, jointName)
+            print(jointID, jointName, jointType)
             
             
             self.joints_name.append(jointName)
         assert hasattr(self, 'eef_id'), "eef_id is not found!"
+        assert hasattr(self, 'gripper_id'), "gripper_id is not found!"
         for motor_joint in self.arm_joint:
             self.arm_motor_ids.append(self.joints_name.index(motor_joint))
 
@@ -103,8 +106,27 @@ class RobotBase(object):
         self.arm_joint_ranges = [info.upperLimit - info.lowerLimit for info in self.joints if info.controllable][:self.arm_num_dofs]
     
     def __post_load__(self):
-        pass
+        mimic_parent_name = self.gripper_joint[0]
+        mimic_children_names = {self.gripper_joint[1] : 1,
+                                self.gripper_joint[2] : 1,
+                                self.gripper_joint[3] : 1,
+                                self.gripper_joint[4] : -1,
+                                self.gripper_joint[5] : -1}
+        self.__setup_mimic_joints__(mimic_parent_name, mimic_children_names)
 
+    def __setup_mimic_joints__(self, mimic_parent_name, mimic_children_names):
+        mimic_parent_id = [joint.id for joint in self.joints if joint.name == mimic_parent_name][0]
+        mimic_child_multiplier = {joint.id: mimic_children_names[joint.name] for joint in self.joints if joint.name in mimic_children_names}
+        print(mimic_parent_id)
+        for joint_id, multiplier in mimic_child_multiplier.items():
+            c = p.createConstraint(self.id, mimic_parent_id,
+                                   self.id, joint_id,
+                                   jointType=p.JOINT_GEAR,
+                                   jointAxis=[0, 1, 0],
+                                   parentFramePosition=[0, 0, 0],
+                                   childFramePosition=[0, 0, 0])
+            p.changeConstraint(c, gearRatio=-multiplier, maxForce=100, erp=1)  # Note: the mysterious `erp` is of EXTREME importance
+            
     def reset(self):
         self.reset_arm()
         self.reset_gripper()

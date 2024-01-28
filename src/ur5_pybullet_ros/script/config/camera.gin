@@ -1,5 +1,5 @@
 Camera.camera_config = "setup.json"
 Camera.near = 0.01
 Camera.far = 2.0
-Camera.relative_offset = [0.12, 0, 0.0]
+Camera.relative_offset = [0.05, 0, -0.05]
 Camera.downsample_resolution = 0.01
