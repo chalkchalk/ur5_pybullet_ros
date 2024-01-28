@@ -2,10 +2,12 @@
 import pybullet as p
 from robots.ur5 import UR5
 import gin
+import numpy as np
 import time
 import pybullet_data
 from ros_wrapper.ros_msg.ros_dtype import ROSDtype
 import os
+from scipy.spatial.transform import Rotation
 
 ROS_CLOCK_TOPIC = "clock"
 
@@ -22,6 +24,7 @@ class Environment():
         self.realtime_factor = realtime_factor
         self.ros_wrapper = self.robot.ros_wrapper
         self.ros_wrapper.add_publisher(ROS_CLOCK_TOPIC, ROSDtype.CLOCK, False)
+        self.udrf_path = os.path.dirname(os.path.abspath(__file__)) + "/urdf/objects/"
         self.load_scenes()
 
     def step(self):
@@ -40,16 +43,25 @@ class Environment():
 
     def load_scenes(self):
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
+        
+        # print(pybullet_data.getDataPath()) #/usr/local/lib/python3.8/dist-packages/pybullet_data
         p.loadURDF('plane.urdf', [0, 0, 0], [0, 0, 0, 1])
-        table1 = p.loadURDF('table/table.urdf', [0, -0.5, -0.2], [0, 0, 0, 1])
-        cube_small = p.loadURDF('cube_small.urdf', [0.0, -0.6, 0.6], [0, 0, 0, 1], globalScaling = 5.0)
-        p.loadURDF('cube.urdf', [-1, 2, 0.6], [0, 0, 0, 1], globalScaling = 0.5)
-        p.loadURDF('cube.urdf', [-3.9, 4, 0.6], [0, 0, 0, 1], globalScaling = 0.5)
-        p.loadURDF('cube.urdf', [-2.6, -2, 0.6], [0, 0, 0, 1], globalScaling = 0.5)
-        p.loadURDF('cube.urdf', [-5, 0, 0.6], [0, 0, 0, 1], globalScaling = 1)
-        p.loadURDF('cube.urdf', [2, 0, 0.6], [0, 0, 0, 1], globalScaling = 1.3)
-        p.loadURDF('cube.urdf', [2, -6, 0.6], [0, 0, 0, 1], globalScaling = 1.3)
-        p.loadURDF('cube.urdf', [6, 1, 0.6], [0, 0, 0, 1], globalScaling = 1.8)
+        table1 = p.loadURDF(self.udrf_path + 'table/table.urdf', [0.8, -1.5, -0.2], [0, 0, 0, 1], useFixedBase=True)
+        cube_small = p.loadURDF(self.udrf_path + 'cube/cube.urdf', [0.8, -1.6, 0.6], [0, 0, 0, 1], globalScaling = 0.2)
+        table2 = p.loadURDF(self.udrf_path + 'table/table.urdf', [-6.5, 1.5, -0.2], [0, 0, 0, 1], useFixedBase=True)
+        
+        self.load_room()
+
+    def load_room(self):
+        p.loadURDF(self.udrf_path + 'block10.urdf', [-3, 2.5, 0.5], [0, 0, 0, 1], useFixedBase=True)
+        p.loadURDF(self.udrf_path + 'block10.urdf', [-3, -2.5, 0.5], [0, 0, 0, 1], useFixedBase=True)
+        p.loadURDF(self.udrf_path + 'block5.urdf', [-8, 0.0, 0.5], Rotation.from_euler('xyz', [0, 0, 90], degrees=True).as_quat(), useFixedBase=True)
+        p.loadURDF(self.udrf_path + 'block5.urdf', [2, 0.0, 0.5], Rotation.from_euler('xyz', [0, 0, 90], degrees=True).as_quat(), useFixedBase=True)
+        p.loadURDF(self.udrf_path + 'block2.urdf', [-1, 1.5, 0.5], Rotation.from_euler('xyz', [0, 0, 90], degrees=True).as_quat(), useFixedBase=True)
+        p.loadURDF(self.udrf_path + 'block3.urdf', [-3, -1.0, 0.5], Rotation.from_euler('xyz', [0, 0, 90], degrees=True).as_quat(), useFixedBase=True)
+        static_cube1 = p.loadURDF(self.udrf_path + 'cube/cube.urdf', [-3, -2, 0.3], [0, 0, 0, 1], globalScaling = 0.7, useFixedBase=True)
+        
+        
         
 CONFIG_FILE = os.path.dirname(os.path.abspath(__file__)) + "/config/env_default.gin"
 gin.parse_config_file(CONFIG_FILE)
