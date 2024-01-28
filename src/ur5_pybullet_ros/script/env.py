@@ -31,7 +31,7 @@ class Environment():
         self.ros_wrapper.publish_msg(ROS_CLOCK_TOPIC, ROSDtype.CLOCK.value(self.time))
         action = self.robot.set_angle[0]    
         self.robot.apply_control(action, "joint")
-        self.robot.move_gripper(0.05)
+        self.robot.move_gripper(0.0)
         # self.robot.set_base_twist([0.0,0.0, 0.3])
         p.stepSimulation()
         end_time = time.time()

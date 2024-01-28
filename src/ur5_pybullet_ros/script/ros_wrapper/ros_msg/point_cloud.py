@@ -11,8 +11,10 @@ FIELDS_XYZ = [
     PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
     PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
 ]
-FIELDS_XYZRGB = FIELDS_XYZ + \
-    [PointField(name='rgb', offset=12, datatype=PointField.UINT32, count=1)]
+FIELDS_XYZRGB = [PointField('x', 0, PointField.FLOAT32, 1),
+                PointField('y', 4, PointField.FLOAT32, 1),
+                PointField('z', 8, PointField.FLOAT32, 1),
+                PointField('rgb', 12, PointField.FLOAT32, 1)]
 
 # Bit operations
 BIT_MOVE_16 = 2**16
@@ -20,17 +22,19 @@ BIT_MOVE_8 = 2**8
 
 class PointCloud(ROSMsgBase): #just use 
     rosdtype = PointCloud2
-    def __init__(self):
+    def __init__(self, open3d_cloud, use_color=False):
         super().__init__()
+        self.open3d_cloud = open3d_cloud
+        self.use_color = use_color
     
     @classmethod
     def transform_rosmsg(cls, data, ros_time, frame_id=""):
         header = Header()
         header.stamp = rospy.Time.from_sec(ros_time)
         header.frame_id = frame_id
-        open3d_cloud = data
+        open3d_cloud = data.open3d_cloud
         points=np.asarray(open3d_cloud.points)
-        if True: # not open3d_cloud.colors: # XYZ only
+        if not data.use_color: # not open3d_cloud.colors: # XYZ only
             fields=FIELDS_XYZ
             cloud_data=points
         else: # XYZ + RGB

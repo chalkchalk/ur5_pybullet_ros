@@ -9,6 +9,7 @@ from scipy.spatial.transform import Rotation as R
 import gin
 import os
 from ros_wrapper.ros_msg.ros_dtype import ROSDtype
+from ros_wrapper.ros_msg.point_cloud import PointCloud
 # some codes are copied from https://github.com/ethz-asl/vgn.git
 
 ROS_IMAGE_TOPIC = "camera"
@@ -157,7 +158,7 @@ class Camera(object):
 
         self.rgb = frame.color_image()  # 这里以显示rgb图像为例, frame还包含了深度图, 也可以转化为点云
         self.bgr = np.ascontiguousarray(self.rgb[:, :, ::-1])  # flip the rgb channel
-        self.point_cloud = frame.point_cloud(self.downsample_resolution)
+        self.point_cloud = PointCloud(frame.point_cloud(self.downsample_resolution), True)
         self.publish_data()
 
     def update_pose(self):

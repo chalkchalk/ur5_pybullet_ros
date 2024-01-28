@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /TF1/Frames1
+        - /PointCloud21
         - /LaserScan1
       Splitter Ratio: 0.5
     Tree Height: 686
@@ -227,8 +228,6 @@ Visualization Manager:
           Value: true
         upper_arm_link:
           Value: true
-        world:
-          Value: true
         wrist_1_link:
           Value: true
         wrist_2_link:
@@ -242,38 +241,37 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        world:
-          odom:
-            chassis_link:
-              base_link:
-                shoulder_link:
-                  upper_arm_link:
-                    forearm_link:
-                      wrist_1_link:
-                        wrist_2_link:
-                          wrist_3_link:
-                            ee_link:
-                              camera_link:
+        odom:
+          chassis_link:
+            base_link:
+              shoulder_link:
+                upper_arm_link:
+                  forearm_link:
+                    wrist_1_link:
+                      wrist_2_link:
+                        wrist_3_link:
+                          ee_link:
+                            camera_link:
+                              {}
+                            robotiq_arg2f_base_link:
+                              left_inner_knuckle:
                                 {}
-                              robotiq_arg2f_base_link:
-                                left_inner_knuckle:
-                                  {}
-                                left_outer_knuckle:
-                                  left_outer_finger:
-                                    left_inner_finger:
-                                      left_inner_finger_pad:
-                                        {}
-                                right_inner_knuckle:
-                                  {}
-                                right_outer_knuckle:
-                                  right_outer_finger:
-                                    right_inner_finger:
-                                      right_inner_finger_pad:
-                                        {}
-              imu_link:
-                {}
-              lidar_link:
-                {}
+                              left_outer_knuckle:
+                                left_outer_finger:
+                                  left_inner_finger:
+                                    left_inner_finger_pad:
+                                      {}
+                              right_inner_knuckle:
+                                {}
+                              right_outer_knuckle:
+                                right_outer_finger:
+                                  right_inner_finger:
+                                    right_inner_finger_pad:
+                                      {}
+            imu_link:
+              {}
+            lidar_link:
+              {}
       Update Interval: 0
       Value: true
     - Alpha: 0.6000000238418579
@@ -286,7 +284,7 @@ Visualization Manager:
       Channel Name: z
       Class: rviz/PointCloud2
       Color: 255; 255; 255
-      Color Transformer: Intensity
+      Color Transformer: RGB8
       Decay Time: 0
       Enabled: true
       Invert Rainbow: false
@@ -370,7 +368,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 7.382696151733398
+      Distance: 2.880842447280884
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -386,9 +384,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6753982305526733
+      Pitch: 0.5903984308242798
       Target Frame: <Fixed Frame>
-      Yaw: 0.575397789478302
+      Yaw: 0.08039777725934982
     Saved: ~
 Window Geometry:
   Displays:
