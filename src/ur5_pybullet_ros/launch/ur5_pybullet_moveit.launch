@@ -1,6 +1,6 @@
 <launch>
 
-  <include file="$(find ur5_pybullet_ros)/launch/ur5_pybullet_ros_env.launch">
+  <include file="$(find ur5_pybullet_ros)/launch/ur5_pybullet_slam_navi.launch">
         <arg name="use_rviz" value="false"/>
   </include>
 
