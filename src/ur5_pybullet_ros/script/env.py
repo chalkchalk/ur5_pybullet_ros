@@ -31,6 +31,7 @@ class Environment():
         self.ros_wrapper.publish_msg(ROS_CLOCK_TOPIC, ROSDtype.CLOCK.value(self.time))
         action = self.robot.set_angle[0]    
         self.robot.apply_control(action, "joint")
+        self.robot.move_gripper(0.05)
         # self.robot.set_base_twist([0.0,0.0, 0.3])
         p.stepSimulation()
         end_time = time.time()
@@ -47,6 +48,9 @@ class Environment():
         p.loadURDF('cube.urdf', [-3.9, 4, 0.6], [0, 0, 0, 1], globalScaling = 0.5)
         p.loadURDF('cube.urdf', [-2.6, -2, 0.6], [0, 0, 0, 1], globalScaling = 0.5)
         p.loadURDF('cube.urdf', [-5, 0, 0.6], [0, 0, 0, 1], globalScaling = 1)
+        p.loadURDF('cube.urdf', [2, 0, 0.6], [0, 0, 0, 1], globalScaling = 1.3)
+        p.loadURDF('cube.urdf', [2, -6, 0.6], [0, 0, 0, 1], globalScaling = 1.3)
+        p.loadURDF('cube.urdf', [6, 1, 0.6], [0, 0, 0, 1], globalScaling = 1.8)
         
 CONFIG_FILE = os.path.dirname(os.path.abspath(__file__)) + "/config/env_default.gin"
 gin.parse_config_file(CONFIG_FILE)
