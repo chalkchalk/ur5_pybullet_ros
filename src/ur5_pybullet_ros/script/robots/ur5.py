@@ -38,10 +38,10 @@ class UR5(RobotBase):
         self.joint_arm_info = {}
         self.joint_info_all = self.get_rotate_joint_info_all()
         self.joint_arm_info = self.get_joint_obs()
-        self.ros_pub_thread = threading.Thread(
-            target=self.pub_ros_info_thread)
-        self.ros_pub_thread.setDaemon(True)
-        self.ros_pub_thread.start()
+        # self.ros_pub_thread = threading.Thread(
+        #     target=self.pub_ros_info_thread)
+        # self.ros_pub_thread.setDaemon(True)
+        # self.ros_pub_thread.start()
 
     def init_ros_interface(self):
         self.ros_wrapper = RosWrapper("ur5_pybullet")
@@ -52,10 +52,11 @@ class UR5(RobotBase):
         
 
     def post_control(self):
-        # self.pub_ros_info()
+        self.pub_ros_info()
         # end_pos, end_orn = self.get_end_state()
         # self.camera.update_pose(end_pos, end_orn)
         self.publish_sensor()
+        self.camera.publish_tf()
         pass
 
     def pre_control(self):

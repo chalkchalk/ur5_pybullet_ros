@@ -110,10 +110,10 @@ class Camera(object):
         self.update_camera_image_thread.setDaemon(True)
         self.update_camera_image_thread.start()
         
-        self.update_camera_tf_thread = threading.Thread(
-            target=self.publish_tf_thread)
-        self.update_camera_tf_thread.setDaemon(True)
-        self.update_camera_tf_thread.start()
+        # self.update_camera_tf_thread = threading.Thread(
+        #     target=self.publish_tf_thread)
+        # self.update_camera_tf_thread.setDaemon(True)
+        # self.update_camera_tf_thread.start()
         
         
     def init_ros_wrapper(self):
@@ -173,6 +173,7 @@ class Camera(object):
         self.orien = end_state[1]
     
     def publish_tf(self):
+        self.update_pose()
         translation, rotation = self.get_cam_offset()
         self.ros_wrapper.publish_tf(self.ee_frame, self.camera_frame, translation, rotation )
     
@@ -180,10 +181,9 @@ class Camera(object):
         last_time = 0
         while not rospy.is_shutdown():
             if last_time != self.ros_wrapper.ros_time:
-                self.update_pose()
                 self.publish_tf()
             last_time = self.ros_wrapper.ros_time
-            rospy.sleep(0.01)
+            rospy.sleep(0.005)
             
     
     def publish_data(self):

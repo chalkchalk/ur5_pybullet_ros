@@ -28,14 +28,13 @@ class Environment():
         self.load_scenes()
 
     def step(self):
-        start_time = time.time()   
-        action = self.robot.set_angle[0]    
-        self.robot.apply_control(action, "joint")
-        # self.robot.set_base_twist([0.0,0.0, 0.3])
-        p.stepSimulation()
+        start_time = time.time() 
+        self.ros_wrapper.publish_msg(ROS_CLOCK_TOPIC, ROSDtype.CLOCK.value(self.time))  
         self.time += self.dt
         self.ros_wrapper.ros_time = self.time
-        self.ros_wrapper.publish_msg(ROS_CLOCK_TOPIC, ROSDtype.CLOCK.value(self.time))
+        self.robot.apply_control(self.robot.set_angle[0], "joint")
+        # self.robot.set_base_twist([0.0,0.0, 0.3])
+        p.stepSimulation()
         end_time = time.time()
         elapsed_time = end_time - start_time
         if self.dt / self.realtime_factor - elapsed_time > 0:
