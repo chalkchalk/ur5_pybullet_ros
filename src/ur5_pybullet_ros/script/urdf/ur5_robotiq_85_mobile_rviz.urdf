@@ -583,6 +583,7 @@
   ########          connect model                #####
   ####################################################-->
     <!-- connect gripper to arm -->
+    <link name="world"/>
     <joint name="robotiq_85_base_joint" type="fixed">
         <parent link="ee_link" />
         <child link="robotiq_arg2f_base_link" />
@@ -594,6 +595,13 @@
     <!--    <origin rpy="-1.57 1.57 -1.57" xyz="0.0 0.0 0.0"/>-->
     <!--  </joint>-->
     <!-- connect arm to world -->
+    <joint name="world_virtual_joint" type="floating">
+        <parent link="world"/>
+        <child link="chassis_link"/>
+        <origin rpy="0.0 0.0 0" xyz="0 0 0"/>
+        <limit effort="5000" velocity="3" lower="-100" upper="100"/>
+        <axis xyz="1 0 0"/>
+    </joint>
 
     <transmission name="trans_shoulder_pan_joint">
         <type>transmission_interface/SimpleTransmission</type>

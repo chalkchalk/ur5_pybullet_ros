@@ -10,6 +10,7 @@ import gin
 import os
 from ros_wrapper.ros_msg.ros_dtype import ROSDtype
 from ros_wrapper.ros_msg.point_cloud import PointCloud
+import rospy
 # some codes are copied from https://github.com/ethz-asl/vgn.git
 
 ROS_IMAGE_TOPIC = "camera"
@@ -109,6 +110,11 @@ class Camera(object):
         self.update_camera_image_thread.setDaemon(True)
         self.update_camera_image_thread.start()
         
+        self.update_camera_tf_thread = threading.Thread(
+            target=self.publish_tf_thread)
+        self.update_camera_tf_thread.setDaemon(True)
+        self.update_camera_tf_thread.start()
+        
         
     def init_ros_wrapper(self):
         self.ros_wrapper.add_publisher(ROS_IMAGE_TOPIC, ROSDtype.IMAGE)
@@ -145,11 +151,11 @@ class Camera(object):
             self.update_camera_image_frame()
             # cv2.imshow("image", self.bgr)
             # key = cv2.waitKey(1)
-            time.sleep(0.1)
+            rospy.sleep(0.1)
     
     def update_camera_image_frame(self):
         self.update_pose()
-        self.publish_tf()
+        # self.publish_tf()
         wcT = self._bind_camera_to_end(self.pose, self.orien)
         cwT = np.linalg.inv(wcT)
 
@@ -169,6 +175,16 @@ class Camera(object):
     def publish_tf(self):
         translation, rotation = self.get_cam_offset()
         self.ros_wrapper.publish_tf(self.ee_frame, self.camera_frame, translation, rotation )
+    
+    def publish_tf_thread(self):
+        last_time = 0
+        while not rospy.is_shutdown():
+            if last_time != self.ros_wrapper.ros_time:
+                self.update_pose()
+                self.publish_tf()
+            last_time = self.ros_wrapper.ros_time
+            rospy.sleep(0.01)
+            
     
     def publish_data(self):
         self.ros_wrapper.publish_msg(ROS_IMAGE_TOPIC, self.bgr)

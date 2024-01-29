@@ -15,6 +15,7 @@
   <group ns="$(arg robot_description)_planning">
     <rosparam command="load" file="$(find ur5_mobile_moveit)/config/joint_limits.yaml"/>
     <rosparam command="load" file="$(find ur5_mobile_moveit)/config/cartesian_limits.yaml"/>
+    <param name="shape_transform_cache_lookup_wait_time" value="0.5" />
   </group>
 
   <!-- Load default settings for kinematics; these settings are overridden by settings in a node's namespace -->

@@ -11,6 +11,7 @@ from controller.trajectory import get_trajectory_from_ros_msg
 from controller.trajectory_follower import TrajecyFollower, FollowState
 from camera.camera import Camera
 from robots.chassis import Chassis
+import rospy
 
 import time
 import threading
@@ -90,7 +91,7 @@ class UR5(RobotBase):
             if last_time != self.ros_wrapper.ros_time:
                 self.pub_ros_info()
             last_time = self.ros_wrapper.ros_time
-            time.sleep(0.01)
+            rospy.sleep(0.01)
     
     def move_gripper(self, open_length):
         open_angle = 0.715 - math.asin((open_length - 0.010) / 0.1143)  # angle calculation
