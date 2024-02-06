@@ -45,9 +45,9 @@ class Environment():
         
         # print(pybullet_data.getDataPath()) #/usr/local/lib/python3.8/dist-packages/pybullet_data
         p.loadURDF('plane.urdf', [0, 0, 0], [0, 0, 0, 1])
-        table1 = p.loadURDF(self.udrf_path + 'table/table.urdf', [0.8, -1.5, -0.2], [0, 0, 0, 1], useFixedBase=True)
+        table1 = p.loadURDF(self.udrf_path + 'table/table.urdf', [0.8, -1.5, -0.25], [0, 0, 0, 1], useFixedBase=True)
         cube_small = p.loadURDF(self.udrf_path + 'cube/cube.urdf', [0.8, -1.6, 0.6], [0, 0, 0, 1], globalScaling = 0.2)
-        table2 = p.loadURDF(self.udrf_path + 'table/table.urdf', [-6.5, 1.5, -0.2], [0, 0, 0, 1], useFixedBase=True)
+        table2 = p.loadURDF(self.udrf_path + 'table/table.urdf', [-6.5, 1.5, -0.25], [0, 0, 0, 1], useFixedBase=True)
         
         self.load_room()
 

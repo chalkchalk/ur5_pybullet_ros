@@ -8,6 +8,7 @@ import moveit_msgs.msg
 import geometry_msgs.msg
 from enum import Enum
 from moveit_commander.conversions import pose_to_list
+from scipy.spatial.transform import Rotation
 
 try:
     from math import pi, tau, dist, fabs, cos
@@ -63,7 +64,9 @@ class UR5MoveitInterface:
             moveit_msgs.msg.DisplayTrajectory,
             queue_size=20,
         )
+        self.move_group.set_pose_reference_frame("base_link")
         self.planning_frame = self.move_group.get_planning_frame()
+        
         print("============ Planning frame: %s" % self.planning_frame)
         self.eef_link = self.move_group.get_end_effector_link()
         print("============ End effector link: %s" % self.eef_link)
@@ -98,7 +101,7 @@ class UR5MoveitInterface:
         @returns: bool
         """
         move_group = self.move_group
-        self.pose_goal.header.frame_id = "world"
+        self.pose_goal.header.frame_id = "base_link"
         self.pose_goal.header.stamp = rospy.Time.now()
         self.pose_goal.pose.orientation.x = orientation[0]
         self.pose_goal.pose.orientation.y = orientation[1]
@@ -128,7 +131,7 @@ class UR5MoveitInterface:
     
     def go_to_position_goal(self, position): 
         move_group = self.move_group
-        self.pose_goal.header.frame_id = "world"
+        self.pose_goal.header.frame_id = "base_link"
         self.pose_goal.header.stamp = rospy.Time.now()
         self.pose_goal.pose.orientation.x = 0.0
         self.pose_goal.pose.orientation.y = 0.0
@@ -162,8 +165,8 @@ class UR5MoveitInterface:
 if __name__ == "__main__":
     ur5_moveit_interface = UR5MoveitInterface()
     # ur5_moveit_interface.go_to_joint_state([0,-0.5,0,0,0,0])
-    # ur5_moveit_interface.go_to_pose_goal([0.6,0.6,0.8], [0,0,0,1])
-    ur5_moveit_interface.go_to_position_goal([0.5,0.5,1.2])
+    ur5_moveit_interface.go_to_pose_goal([0.5,0.0,0.7], Rotation.from_euler('xyz', [0, 90, 0], degrees=True).as_quat())
+    # ur5_moveit_interface.go_to_position_goal([0.5,0.0,0.6])
     while True:
         ur5_moveit_interface.publish_status()
         rospy.sleep(0.01)
