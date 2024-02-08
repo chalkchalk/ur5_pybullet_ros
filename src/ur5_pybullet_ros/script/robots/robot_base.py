@@ -107,11 +107,14 @@ class RobotBase(object):
     
     def __post_load__(self):
         mimic_parent_name = self.gripper_joint[0]
-        mimic_children_names = {self.gripper_joint[1] : 1,
-                                self.gripper_joint[2] : 1,
-                                self.gripper_joint[3] : 1,
-                                self.gripper_joint[4] : -1,
-                                self.gripper_joint[5] : -1}
+        mimic_children_names = {
+                                self.gripper_joint[1] : 1, # right_outer_knuckle_joint
+                                self.gripper_joint[2] : 1, # left_inner_knuckle_joint
+                                self.gripper_joint[3] : 1, # right_inner_knuckle_joint
+                                self.gripper_joint[4] : -1,# left_inner_finger_joint
+                                self.gripper_joint[5] : -1 # right_inner_finger_joint
+                                }
+        
         self.__setup_mimic_joints__(mimic_parent_name, mimic_children_names)
 
     def __setup_mimic_joints__(self, mimic_parent_name, mimic_children_names):
@@ -125,7 +128,7 @@ class RobotBase(object):
                                    jointAxis=[0, 1, 0],
                                    parentFramePosition=[0, 0, 0],
                                    childFramePosition=[0, 0, 0])
-            p.changeConstraint(c, gearRatio=-multiplier, maxForce=100, erp=1)  # Note: the mysterious `erp` is of EXTREME importance
+            p.changeConstraint(c, gearRatio=-multiplier, maxForce=10, erp=1.0)  # Note: the mysterious `erp` is of EXTREME importance
             
     def reset(self):
         self.reset_arm()

@@ -45,10 +45,10 @@ class Environment():
         
         # print(pybullet_data.getDataPath()) #/usr/local/lib/python3.8/dist-packages/pybullet_data
         p.loadURDF('plane.urdf', [0, 0, 0], [0, 0, 0, 1])
-        table1 = p.loadURDF(self.udrf_path + 'table/table.urdf', [0.8, -1.5, -0.25], [0, 0, 0, 1], useFixedBase=True)
-        cube_small = p.loadURDF(self.udrf_path + 'cube/cube.urdf', [0.8, -1.6, 0.6], [0, 0, 0, 1], globalScaling = 0.2)
-        table2 = p.loadURDF(self.udrf_path + 'table/table.urdf', [-6.5, 1.5, -0.25], [0, 0, 0, 1], useFixedBase=True)
-        
+        table1 = p.loadURDF(self.udrf_path + 'table/table.urdf', [0.8, -1.5, -0.25], [0, 0, 0, 1], useFixedBase=True, globalScaling = 1.0)
+        # cube_small = p.loadURDF(self.udrf_path + 'cube/cube.urdf', [0.8, -1.6, 0.6], [0, 0, 0, 1], globalScaling = 0.2)
+        table2 = p.loadURDF(self.udrf_path + 'table/table.urdf', [-6.5, 1.5, -0.25], [0, 0, 0, 1], useFixedBase=True, globalScaling = 1.0)
+        self.load_balls()
         self.load_room()
 
     def load_room(self):
@@ -59,6 +59,11 @@ class Environment():
         p.loadURDF(self.udrf_path + 'block2.urdf', [-1, 1.5, 0.5], Rotation.from_euler('xyz', [0, 0, 90], degrees=True).as_quat(), useFixedBase=True)
         p.loadURDF(self.udrf_path + 'block3.urdf', [-3, -1.0, 0.5], Rotation.from_euler('xyz', [0, 0, 90], degrees=True).as_quat(), useFixedBase=True)
         static_cube1 = p.loadURDF(self.udrf_path + 'cube/cube.urdf', [-3, -2, 0.3], [0, 0, 0, 1], globalScaling = 0.7, useFixedBase=True)
+    
+    def load_balls(self):
+        p.loadURDF(self.udrf_path + 'ball/green_ball.urdf', [-6.5, 1.4, 0.5], [0, 0, 0, 1])
+        p.loadURDF(self.udrf_path + 'ball/red_ball.urdf', [0.8, -1.4, 0.5], [0, 0, 0, 1])
+        
         
         
         

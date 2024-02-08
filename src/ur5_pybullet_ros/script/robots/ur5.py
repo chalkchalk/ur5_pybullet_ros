@@ -19,6 +19,7 @@ import threading
 ROS_SET_ANGLE_TOPIC = "set_angle"
 ROS_JOINT_STATES_TOPIC = "joint_states"
 ROS_JOINT_ANGLE_TOPIC = "joint_angles"
+ROS_GRIPPER_TOPIC = "gripper_open_ratio"
 
 
 @gin.configurable
@@ -30,6 +31,7 @@ class UR5(RobotBase):
         self.reset()
         self.time = 0
         self.set_angle = [inital_angle] # we use list to make it a mutable variable, so the callback of ros can change this value naturely
+        self.gripper_open_ratio = [1.0]
         self.init_ros_interface()
         self.chassis = Chassis(self.ros_wrapper, self.id, self.get_joint_id(chassis_joint))
         self.camera = Camera(self.ros_wrapper, self.id, self.get_joint_id([eef_joint])[0])
@@ -38,6 +40,7 @@ class UR5(RobotBase):
         self.joint_arm_info = {}
         self.joint_info_all = self.get_rotate_joint_info_all()
         self.joint_arm_info = self.get_joint_obs()
+        
         # self.ros_pub_thread = threading.Thread(
         #     target=self.pub_ros_info_thread)
         # self.ros_pub_thread.setDaemon(True)
@@ -47,6 +50,7 @@ class UR5(RobotBase):
         self.ros_wrapper = RosWrapper("ur5_pybullet")
         self.joint_tra_action_server = JointTrajectoryActionServer(self. arm_joint, "ur5_controller")
         self.ros_wrapper.add_subscriber(ROS_SET_ANGLE_TOPIC, ROSDtype.FLOAT_ARRAY, self.set_angle)
+        self.ros_wrapper.add_subscriber(ROS_GRIPPER_TOPIC, ROSDtype.FLOAT, self.gripper_open_ratio)
         self.ros_wrapper.add_publisher(ROS_JOINT_STATES_TOPIC, ROSDtype.JOINT_STATE, False)
         self.ros_wrapper.add_publisher(ROS_JOINT_ANGLE_TOPIC, ROSDtype.FLOAT_ARRAY)
         
@@ -57,6 +61,7 @@ class UR5(RobotBase):
         # self.camera.update_pose(end_pos, end_orn)
         self.publish_sensor()
         self.camera.publish_tf()
+        self.move_gripper(self.gripper_open_ratio[0] * (self.gripper_range[1] - self.gripper_range[0]) + self.gripper_range[0])
         pass
 
     def pre_control(self):
