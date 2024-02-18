@@ -79,7 +79,7 @@ class RobotBase(object):
             jointUpperLimit = info[9]
             jointMaxForce = info[10]
             jointMaxVelocity = info[11]
-            controllable = (jointType != p.JOINT_FIXED) and jointName in self.arm_joint
+            controllable = (jointType != p.JOINT_FIXED) #  and jointName in self.arm_joint
             if controllable:
                 p.setJointMotorControl2(self.id, jointID, p.VELOCITY_CONTROL, targetVelocity=0, force=0)
             info = jointInfo(jointID,jointName,jointType,jointDamping,jointFriction,jointLowerLimit,
@@ -106,30 +106,8 @@ class RobotBase(object):
         self.arm_joint_ranges = [info.upperLimit - info.lowerLimit for info in self.joints if info.controllable][:self.arm_num_dofs]
     
     def __post_load__(self):
-        mimic_parent_name = self.gripper_joint[0]
-        mimic_children_names = {
-                                self.gripper_joint[1] : 1, # right_outer_knuckle_joint
-                                self.gripper_joint[2] : 1, # left_inner_knuckle_joint
-                                self.gripper_joint[3] : 1, # right_inner_knuckle_joint
-                                self.gripper_joint[4] : -1,# left_inner_finger_joint
-                                self.gripper_joint[5] : -1 # right_inner_finger_joint
-                                }
-        
-        self.__setup_mimic_joints__(mimic_parent_name, mimic_children_names)
+        pass
 
-    def __setup_mimic_joints__(self, mimic_parent_name, mimic_children_names):
-        mimic_parent_id = [joint.id for joint in self.joints if joint.name == mimic_parent_name][0]
-        mimic_child_multiplier = {joint.id: mimic_children_names[joint.name] for joint in self.joints if joint.name in mimic_children_names}
-        print(mimic_parent_id)
-        for joint_id, multiplier in mimic_child_multiplier.items():
-            c = p.createConstraint(self.id, mimic_parent_id,
-                                   self.id, joint_id,
-                                   jointType=p.JOINT_GEAR,
-                                   jointAxis=[0, 1, 0],
-                                   parentFramePosition=[0, 0, 0],
-                                   childFramePosition=[0, 0, 0])
-            p.changeConstraint(c, gearRatio=-multiplier, maxForce=10, erp=1.0)  # Note: the mysterious `erp` is of EXTREME importance
-            
     def reset(self):
         self.reset_arm()
         self.reset_gripper()

@@ -45,6 +45,31 @@ class UR5(RobotBase):
         #     target=self.pub_ros_info_thread)
         # self.ros_pub_thread.setDaemon(True)
         # self.ros_pub_thread.start()
+    
+    def __post_load__(self):
+        mimic_parent_name = self.gripper_joint[0]
+        mimic_children_names = {
+                                self.gripper_joint[1] : 1, # right_outer_knuckle_joint
+                                self.gripper_joint[2] : 1, # left_inner_knuckle_joint
+                                self.gripper_joint[3] : 1, # right_inner_knuckle_joint
+                                self.gripper_joint[4] : -1,# left_inner_finger_joint
+                                self.gripper_joint[5] : -1 # right_inner_finger_joint
+                                }
+        
+        
+        self.__setup_mimic_joints__(mimic_parent_name, mimic_children_names)
+
+    def __setup_mimic_joints__(self, mimic_parent_name, mimic_children_names):
+        mimic_parent_id = [joint.id for joint in self.joints if joint.name == mimic_parent_name][0]
+        mimic_child_multiplier = {joint.id: mimic_children_names[joint.name] for joint in self.joints if joint.name in mimic_children_names}
+        for joint_id, multiplier in mimic_child_multiplier.items():
+            c = p.createConstraint(self.id, mimic_parent_id,
+                                   self.id, joint_id,
+                                   jointType=p.JOINT_GEAR,
+                                   jointAxis=[0, 1, 0],
+                                   parentFramePosition=[0, 0, 0],
+                                   childFramePosition=[0, 0, 0])
+            p.changeConstraint(c, gearRatio=-multiplier, maxForce=100, erp=1.0)  # Note: the mysterious `erp` is of EXTREME importance
 
     def init_ros_interface(self):
         self.ros_wrapper = RosWrapper("ur5_pybullet")
