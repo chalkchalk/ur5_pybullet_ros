@@ -8,6 +8,7 @@ import pybullet_data
 from ros_wrapper.ros_msg.ros_dtype import ROSDtype
 import os
 from scipy.spatial.transform import Rotation
+from moving_object.moving_object import MovingObject
 
 ROS_CLOCK_TOPIC = "clock"
 
@@ -33,6 +34,7 @@ class Environment():
         self.time += self.dt
         self.ros_wrapper.ros_time = self.time
         self.robot.apply_control(self.robot.set_angle[0], "joint")
+        self.moving_object1.update_position(self.time)
         # self.robot.set_base_twist([0.0,0.0, 0.3])
         p.stepSimulation()
         end_time = time.time()
@@ -50,6 +52,7 @@ class Environment():
         table2 = p.loadURDF(self.udrf_path + 'table/table.urdf', [-6.5, 1.5, -0.25], [0, 0, 0, 1], useFixedBase=True, globalScaling = 1.0)
         self.load_balls()
         self.load_room()
+        self.load_moving_obstacle()
 
     def load_room(self):
         p.loadURDF(self.udrf_path + 'block10.urdf', [-3, 2.5, 0.5], [0, 0, 0, 1], useFixedBase=True)
@@ -63,6 +66,10 @@ class Environment():
     def load_balls(self):
         p.loadURDF(self.udrf_path + 'ball/green_ball.urdf', [-6.5, 1.4, 0.5], [0, 0, 0, 1])
         p.loadURDF(self.udrf_path + 'ball/red_ball.urdf', [0.8, -1.4, 0.5], [0, 0, 0, 1])
+    
+    def load_moving_obstacle(self):
+        moving_object_id_1 = p.loadURDF(self.udrf_path + 'cylinder.urdf', [-1.0, 1.4, 0.5], [0, 0, 0, 1])
+        self.moving_object1 = MovingObject(moving_object_id_1, [-1.5, 0, 0], [-1.5, -2, 0], 8.0)
         
         
         

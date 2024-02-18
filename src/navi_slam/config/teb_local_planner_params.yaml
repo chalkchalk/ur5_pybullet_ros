@@ -5,7 +5,7 @@ TebLocalPlannerROS:
  teb_autosize: True
  dt_ref: 0.3
  dt_hysteresis: 0.1
- max_samples: 100
+ max_samples: 30
  global_plan_overwrite_orientation: True
  allow_init_with_backwards_motion: True
  max_global_plan_lookahead_dist: 1.0
@@ -17,10 +17,10 @@ TebLocalPlannerROS:
     
  # Robot
          
- max_vel_x: 0.5
- max_vel_x_backwards: 0.2
- max_vel_y: 0.5
- max_vel_theta: 2.8
+ max_vel_x: 1.0
+ max_vel_x_backwards: 0.5
+ max_vel_y: 1.0
+ max_vel_theta: 3.5
  acc_lim_x: 0.8
  acc_lim_y: 0.8
  acc_lim_theta: 0.8
@@ -64,7 +64,7 @@ TebLocalPlannerROS:
  weight_kinematics_nh: 100
  weight_kinematics_forward_drive: 1
  weight_kinematics_turning_radius: 0.2
- weight_optimaltime: 10 # must be > 0
+ weight_optimaltime: 50 # must be > 0
  weight_shortest_path: 0
  weight_obstacle: 100
  weight_inflation: 0.2
