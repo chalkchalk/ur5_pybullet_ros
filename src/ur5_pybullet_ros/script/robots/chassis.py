@@ -32,6 +32,7 @@ class Chassis:
         self.lidar = Lidar(self.ros_wrapper, self.robot_id, self.lidar_joint_id)
         self.imu = IMUSensor(self.ros_wrapper, self.robot_id, self.imu_joint_id)
         self.init_ros_wrapper()
+        self.set_twist(self.twist)
     
     def init_ros_wrapper(self):
         self.ros_wrapper.add_subscriber(ROS_CMD_VEL_TOPIC, ROSDtype.TWIST, use_namespace=False, callback=self.cmdvel_callback)
