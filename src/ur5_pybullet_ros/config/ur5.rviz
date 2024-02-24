@@ -8,7 +8,6 @@ Panels:
         - /Status1
         - /TF1/Frames1
         - /PointCloud21
-        - /navigation1
         - /navigation1/Map1
         - /navigation1/PoseArray1
       Splitter Ratio: 0.5
@@ -414,6 +413,23 @@ Visualization Manager:
           Value: true
       Enabled: true
       Name: navigation
+    - Alpha: 1
+      Arrow Length: 0.30000001192092896
+      Axes Length: 0.30000001192092896
+      Axes Radius: 0.009999999776482582
+      Class: rviz/PoseArray
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.07000000029802322
+      Head Radius: 0.029999999329447746
+      Name: PoseArray
+      Queue Size: 10
+      Shaft Length: 0.23000000417232513
+      Shaft Radius: 0.009999999776482582
+      Shape: Arrow (Flat)
+      Topic: /particlecloud
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -442,7 +458,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 12.077251434326172
+      Distance: 10
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -450,17 +466,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -2.205956220626831
-        Y: -1.4084060192108154
-        Z: 1.0889067649841309
+        X: 0
+        Y: 0
+        Z: 0
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.3653988242149353
+      Pitch: 0.7853981852531433
       Target Frame: <Fixed Frame>
-      Yaw: 0.9872182011604309
+      Yaw: 0.7853981852531433
     Saved: ~
 Window Geometry:
   Displays:

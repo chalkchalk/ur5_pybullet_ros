@@ -12,6 +12,7 @@ from controller.trajectory_follower import TrajecyFollower, FollowState
 from camera.camera import Camera
 from robots.chassis import Chassis
 import rospy
+import yaml
 
 import time
 import threading
@@ -25,6 +26,11 @@ ROS_GRIPPER_TOPIC = "gripper_open_ratio"
 @gin.configurable
 class UR5(RobotBase):
     def __init__(self, urdf_file, base_pos, base_ori, inital_angle, gripper_range, arm_joint, eef_joint, chassis_joint, gripper_joint):
+        config_file = os.path.dirname(os.path.abspath(__file__)) + "/../config/config.yaml"
+        with open(config_file, 'r') as file:
+            self.config = yaml.safe_load(file)
+        base_pos[0] = self.config["robot"]["initial_x"]
+        base_pos[1] = self.config["robot"]["initial_y"]
         self.name = "UR5"
         urdf_file = os.path.dirname(os.path.abspath(__file__)) + "/../urdf/" + urdf_file
         super().__init__(self.name, urdf_file, base_pos, base_ori, inital_angle, gripper_range, arm_joint, eef_joint, gripper_joint)

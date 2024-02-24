@@ -9,6 +9,7 @@ from ros_wrapper.ros_msg.ros_dtype import ROSDtype
 import os
 from scipy.spatial.transform import Rotation
 from moving_object.moving_object import MovingObject
+import yaml
 
 ROS_CLOCK_TOPIC = "clock"
 
@@ -19,6 +20,9 @@ class Environment():
         p.setRealTimeSimulation(setRealTimeSimulation)
         p.setGravity(0, 0, -9.81)
         p.setTimeStep(dt)
+        config_file = os.path.dirname(os.path.abspath(__file__)) + "/config/config.yaml"
+        with open(config_file, 'r') as file:
+            self.config = yaml.safe_load(file)
         self.robot = UR5()
         self.dt = dt
         self.time = 0.0
@@ -26,6 +30,7 @@ class Environment():
         self.ros_wrapper = self.robot.ros_wrapper
         self.ros_wrapper.add_publisher(ROS_CLOCK_TOPIC, ROSDtype.CLOCK, False)
         self.udrf_path = os.path.dirname(os.path.abspath(__file__)) + "/urdf/objects/"
+        
         self.load_scenes()
 
     def step(self):
@@ -53,6 +58,7 @@ class Environment():
         self.load_balls()
         self.load_room()
         self.load_moving_obstacle()
+        self.load_config_obstacles()
 
     def load_room(self):
         p.loadURDF(self.udrf_path + 'block10.urdf', [-3, 2.5, 0.5], [0, 0, 0, 1], useFixedBase=True)
@@ -69,7 +75,13 @@ class Environment():
     
     def load_moving_obstacle(self):
         moving_object_id_1 = p.loadURDF(self.udrf_path + 'cylinder.urdf', [-1.0, 1.4, 0.5], [0, 0, 0, 1])
-        self.moving_object1 = MovingObject(moving_object_id_1, [-1.5, 0, 0], [-1.5, -2, 0], 8.0)
+        self.moving_object1 = MovingObject(moving_object_id_1, [-1.5, 0, 0], [-1.5, -2, 0], 12.0)
+    
+    def load_config_obstacles(self):
+        path = os.path.dirname(os.path.abspath(__file__)) + "/urdf/obstacles/"
+        if self.config["obstacles"]:
+            for obstacle in self.config["obstacles"]:
+                p.loadURDF(path + obstacle["name"], obstacle["pos"], [0, 0, 0, 1], useFixedBase=True)
         
         
         
