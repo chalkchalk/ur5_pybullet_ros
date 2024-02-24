@@ -30,7 +30,7 @@ class Environment():
         self.ros_wrapper = self.robot.ros_wrapper
         self.ros_wrapper.add_publisher(ROS_CLOCK_TOPIC, ROSDtype.CLOCK, False)
         self.udrf_path = os.path.dirname(os.path.abspath(__file__)) + "/urdf/objects/"
-        
+        self.grasp_target = []
         self.load_scenes()
 
     def step(self):
@@ -40,6 +40,7 @@ class Environment():
         self.ros_wrapper.ros_time = self.time
         self.robot.apply_control(self.robot.set_angle[0], "joint")
         self.moving_object1.update_position(self.time)
+        self.fake_grasp()
         # self.robot.set_base_twist([0.0,0.0, 0.3])
         p.stepSimulation()
         end_time = time.time()
@@ -55,10 +56,11 @@ class Environment():
         table1 = p.loadURDF(self.udrf_path + 'table/table.urdf', [0.8, -1.5, -0.25], [0, 0, 0, 1], useFixedBase=True, globalScaling = 1.0)
         # cube_small = p.loadURDF(self.udrf_path + 'cube/cube.urdf', [0.8, -1.6, 0.6], [0, 0, 0, 1], globalScaling = 0.2)
         table2 = p.loadURDF(self.udrf_path + 'table/table.urdf', [-6.5, 1.5, -0.25], [0, 0, 0, 1], useFixedBase=True, globalScaling = 1.0)
-        self.load_balls()
+        self.load_grasp_target()
         self.load_room()
         self.load_moving_obstacle()
-        self.load_config_obstacles()
+        if self.config["use_config"]:
+            self.load_config_obstacles()
 
     def load_room(self):
         p.loadURDF(self.udrf_path + 'block10.urdf', [-3, 2.5, 0.5], [0, 0, 0, 1], useFixedBase=True)
@@ -69,19 +71,29 @@ class Environment():
         p.loadURDF(self.udrf_path + 'block3.urdf', [-3, -1.0, 0.5], Rotation.from_euler('xyz', [0, 0, 90], degrees=True).as_quat(), useFixedBase=True)
         static_cube1 = p.loadURDF(self.udrf_path + 'cube/cube.urdf', [-3, -2, 0.3], [0, 0, 0, 1], globalScaling = 0.7, useFixedBase=True)
     
-    def load_balls(self):
-        p.loadURDF(self.udrf_path + 'ball/green_ball.urdf', [-6.5, 1.4, 0.5], [0, 0, 0, 1])
-        p.loadURDF(self.udrf_path + 'ball/red_ball.urdf', [0.8, -1.4, 0.5], [0, 0, 0, 1])
+    def load_grasp_target(self):
+        self.grasp_target.append(p.loadURDF(self.udrf_path + 'ball/green_ball.urdf', [-6.5, 1.4, 0.5], [0, 0, 0, 1], globalScaling = 0.7))
+        self.grasp_target.append(p.loadURDF(self.udrf_path + 'ball/red_ball.urdf', [0.8, -1.4, 0.5], [0, 0, 0, 1], globalScaling = 0.7))
     
     def load_moving_obstacle(self):
         moving_object_id_1 = p.loadURDF(self.udrf_path + 'cylinder.urdf', [-1.0, 1.4, 0.5], [0, 0, 0, 1])
-        self.moving_object1 = MovingObject(moving_object_id_1, [-1.5, 0, 0], [-1.5, -2, 0], 12.0)
+        self.moving_object1 = MovingObject(moving_object_id_1, [-1.5, 0, 0], [-1.5, -2, 0], 8.0)
     
     def load_config_obstacles(self):
         path = os.path.dirname(os.path.abspath(__file__)) + "/urdf/obstacles/"
         if self.config["obstacles"]:
             for obstacle in self.config["obstacles"]:
                 p.loadURDF(path + obstacle["name"], obstacle["pos"], [0, 0, 0, 1], useFixedBase=True)
+    
+    def fake_grasp(self):
+        pos, ori = self.robot.get_end_state()
+        offset = np.array([0.13, 0, 0.0])
+        grip_pos = np.array(pos) + np.dot(Rotation.from_quat(ori).as_matrix(),offset)
+        for target in self.grasp_target:
+            target_pos = p.getBasePositionAndOrientation(target)[0]
+            dist = np.linalg.norm((np.array(target_pos) - np.array(grip_pos)))
+            if dist < 0.5 and self.robot.gripper_open_ratio[0] < 0.8:
+                p.resetBasePositionAndOrientation(target, grip_pos, ori)
         
         
         
