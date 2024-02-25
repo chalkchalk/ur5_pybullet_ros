@@ -3,10 +3,10 @@ import os
 import pybullet as p
 import gin
 import math
-from ros_wrapper.ros_wrapper import RosWrapper
-from ros_wrapper.ros_msg.ros_dtype import ROSDtype
-from ros_wrapper.ros_msg.robot_joint_state import RobotJointState
-from ros_wrapper.joint_trajectory_action_server import  JointTrajectoryActionServer, ActionState
+from ros_wrapper_pkg.ros_wrapper import RosWrapper
+from ros_wrapper_pkg.ros_msg.ros_dtype import ROSDtype
+from ros_wrapper_pkg.ros_msg.robot_joint_state import RobotJointState
+from ros_wrapper_pkg.joint_trajectory_action_server import  JointTrajectoryActionServer, ActionState
 from controller.trajectory import get_trajectory_from_ros_msg
 from controller.trajectory_follower import TrajecyFollower, FollowState
 from camera.camera import Camera

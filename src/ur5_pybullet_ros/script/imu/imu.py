@@ -1,5 +1,5 @@
-from ros_wrapper.ros_msg.imu import ImuData
-from ros_wrapper.ros_msg.ros_dtype import ROSDtype
+from ros_wrapper_pkg.ros_msg.imu import ImuData
+from ros_wrapper_pkg.ros_msg.ros_dtype import ROSDtype
 import gin
 import os
 from utilis.utilis import get_joint_id

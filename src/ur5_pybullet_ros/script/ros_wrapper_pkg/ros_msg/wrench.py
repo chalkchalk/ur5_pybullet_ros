@@ -1,5 +1,5 @@
 from geometry_msgs.msg import WrenchStamped
-from ros_wrapper.ros_msg.ros_msg_base import ROSMsgBase
+from ros_wrapper_pkg.ros_msg.ros_msg_base import ROSMsgBase
 import numpy as np
 import rospy
 

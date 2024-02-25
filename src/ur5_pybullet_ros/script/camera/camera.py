@@ -8,8 +8,8 @@ import threading
 from scipy.spatial.transform import Rotation as R
 import gin
 import os
-from ros_wrapper.ros_msg.ros_dtype import ROSDtype
-from ros_wrapper.ros_msg.point_cloud import PointCloud
+from ros_wrapper_pkg.ros_msg.ros_dtype import ROSDtype
+from ros_wrapper_pkg.ros_msg.point_cloud import PointCloud
 import rospy
 # some codes are copied from https://github.com/ethz-asl/vgn.git
 

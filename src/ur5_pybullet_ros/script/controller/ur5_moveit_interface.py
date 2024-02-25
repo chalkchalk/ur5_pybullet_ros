@@ -54,7 +54,6 @@ def all_close(goal, actual, tolerance):
 class UR5MoveitInterface:
     def __init__(self):
         moveit_commander.roscpp_initialize(sys.argv)
-        rospy.init_node("ur5_move_group_python_interface")
         self.robot = moveit_commander.RobotCommander()
         self.scene = moveit_commander.PlanningSceneInterface()
         self.group_name = "arm"
@@ -88,10 +87,12 @@ class UR5MoveitInterface:
         joint_goal = move_group.get_current_joint_values()
         assert len(joint_state) == len(joint_goal), "joint_state must have same dim with joint_goal!"
         joint_goal = joint_state
+        print("set joint target ",  joint_goal)
         move_group.go(joint_goal, wait=True)
         move_group.stop()
         current_joints = move_group.get_current_joint_values()
         if all_close(joint_goal, current_joints, 0.01):
+            print("joint state set success")
             return ActionResult.SUCCESS
 
     def go_to_pose_goal(self, position, orientation): 
@@ -163,9 +164,10 @@ class UR5MoveitInterface:
         self.goal_pose_pub.publish(self.pose_goal)
 
 if __name__ == "__main__":
+    rospy.init_node("ur5_move_group_python_interface")
     ur5_moveit_interface = UR5MoveitInterface()
-    # ur5_moveit_interface.go_to_joint_state([0,-0.5,0,0,0,0])
-    ur5_moveit_interface.go_to_pose_goal([0.5,0.0,0.7], Rotation.from_euler('xyz', [0, 90, 0], degrees=True).as_quat())
+    ur5_moveit_interface.go_to_joint_state([0,-0.5,0,0,0,0])
+    # ur5_moveit_interface.go_to_pose_goal([0.5,0.0,0.7], Rotation.from_euler('xyz', [0, 90, 0], degrees=True).as_quat())
     # ur5_moveit_interface.go_to_position_goal([0.5,0.0,0.6])
     while True:
         ur5_moveit_interface.publish_status()

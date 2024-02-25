@@ -5,7 +5,7 @@ import gin
 import numpy as np
 import time
 import pybullet_data
-from ros_wrapper.ros_msg.ros_dtype import ROSDtype
+from ros_wrapper_pkg.ros_msg.ros_dtype import ROSDtype
 import os
 from scipy.spatial.transform import Rotation
 from moving_object.moving_object import MovingObject
@@ -92,8 +92,9 @@ class Environment():
         for target in self.grasp_target:
             target_pos = p.getBasePositionAndOrientation(target)[0]
             dist = np.linalg.norm((np.array(target_pos) - np.array(grip_pos)))
-            if dist < 0.5 and self.robot.gripper_open_ratio[0] < 0.8:
+            if dist < 0.08 and self.robot.gripper_open_ratio[0] < 0.8:
                 p.resetBasePositionAndOrientation(target, grip_pos, ori)
+                
         
         
         

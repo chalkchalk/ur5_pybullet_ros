@@ -1,7 +1,7 @@
 import rospy
 import numpy as np
 from rosgraph_msgs.msg import Clock
-from ros_wrapper.ros_msg.ros_msg_base import ROSMsgBase
+from ros_wrapper_pkg.ros_msg.ros_msg_base import ROSMsgBase
 
 
 class ROSClock(ROSMsgBase):

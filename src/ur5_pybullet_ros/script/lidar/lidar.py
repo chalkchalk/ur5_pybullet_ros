@@ -5,8 +5,8 @@ import gin
 import os
 import time
 import threading
-from ros_wrapper.ros_msg.laser_scan import LaserScan
-from ros_wrapper.ros_msg.ros_dtype import ROSDtype
+from ros_wrapper_pkg.ros_msg.laser_scan import LaserScan
+from ros_wrapper_pkg.ros_msg.ros_dtype import ROSDtype
 
 
 ROS_LIDAR_TOPIC = "scan"

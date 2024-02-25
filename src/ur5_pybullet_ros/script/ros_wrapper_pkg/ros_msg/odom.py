@@ -1,4 +1,4 @@
-from ros_wrapper.ros_msg.ros_msg_base import ROSMsgBase
+from ros_wrapper_pkg.ros_msg.ros_msg_base import ROSMsgBase
 from nav_msgs.msg import Odometry
 import rospy
 

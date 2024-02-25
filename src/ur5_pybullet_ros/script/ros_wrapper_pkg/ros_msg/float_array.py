@@ -1,5 +1,5 @@
 from std_msgs.msg import Float64MultiArray
-from ros_wrapper.ros_msg.ros_msg_base import ROSMsgBase
+from ros_wrapper_pkg.ros_msg.ros_msg_base import ROSMsgBase
 import numpy as np
 
 class FloatArray(ROSMsgBase):

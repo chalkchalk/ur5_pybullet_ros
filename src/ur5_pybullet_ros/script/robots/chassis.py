@@ -3,8 +3,8 @@ import numpy as np
 from lidar.lidar import Lidar
 from imu.imu import IMUSensor
 from scipy.spatial.transform import Rotation
-from ros_wrapper.ros_msg.ros_dtype import ROSDtype
-from ros_wrapper.ros_msg.odom import Odom
+from ros_wrapper_pkg.ros_msg.ros_dtype import ROSDtype
+from ros_wrapper_pkg.ros_msg.odom import Odom
 import gin
 import os
 from utilis.utilis import get_joint_id
@@ -54,7 +54,7 @@ class Chassis:
         twist_w[1] = twist[0] * np.sin(theta) + twist[1] * np.cos(theta)
         twist_w[2] = twist[2]
         for i in range(3):
-            p.setJointMotorControl2(self.robot_id, self.joint_id[i] , p.VELOCITY_CONTROL, targetVelocity=twist_w[i],force=1000 )
+            p.setJointMotorControl2(self.robot_id, self.joint_id[i] , p.VELOCITY_CONTROL, targetVelocity=twist_w[i],force=1000)
     
     def update_pos(self):
         self.chassis_state = p.getLinkState(self.robot_id, self.joint_id[3], computeLinkVelocity=True, computeForwardKinematics=False)
@@ -63,6 +63,7 @@ class Chassis:
         self.pos[2] = Rotation.from_quat(self.chassis_state[1]).as_euler('xyz')[2]
     
     def publish_odom(self):
+        self.update_pos()
         pos = np.array(self.chassis_state[0]) - self.pos_offset
         odom = Odom(pos, self.chassis_state[1], self.chassis_state[6], self.chassis_state[7],"odom")
         self.ros_wrapper.publish_msg(ROS_ODOM_TOPIC, odom)

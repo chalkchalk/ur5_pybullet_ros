@@ -5,6 +5,10 @@
   </material>
 
   <link name="base_link">
+    <contact>
+      <lateral_friction value="5.0"/>
+      <inertia_scaling value="5.0"/>
+    </contact>
     <visual>
       <origin xyz="0. 0. 0." rpy="0. 0. 0." />
       <geometry>  

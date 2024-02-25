@@ -1,5 +1,5 @@
 from sensor_msgs.msg import Imu
-from ros_wrapper.ros_msg.ros_msg_base import ROSMsgBase
+from ros_wrapper_pkg.ros_msg.ros_msg_base import ROSMsgBase
 import rospy
 
 

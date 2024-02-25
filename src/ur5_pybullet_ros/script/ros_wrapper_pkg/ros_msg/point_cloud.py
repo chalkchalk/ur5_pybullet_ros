@@ -1,6 +1,6 @@
 from sensor_msgs import point_cloud2
 from sensor_msgs.msg import PointField, PointCloud2
-from ros_wrapper.ros_msg.ros_msg_base import ROSMsgBase
+from ros_wrapper_pkg.ros_msg.ros_msg_base import ROSMsgBase
 from std_msgs.msg import Header
 import rospy
 import numpy as np

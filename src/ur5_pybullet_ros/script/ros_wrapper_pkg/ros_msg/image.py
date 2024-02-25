@@ -1,4 +1,4 @@
-from ros_wrapper.ros_msg.ros_msg_base import ROSMsgBase
+from ros_wrapper_pkg.ros_msg.ros_msg_base import ROSMsgBase
 import numpy as np
 from sensor_msgs.msg import Image as ImageROS
 from cv_bridge import CvBridge

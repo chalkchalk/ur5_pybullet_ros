@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
 import rospy
 import numpy as np
-from ros_wrapper.ros_msg.ros_dtype import ROSDtype
+from ros_wrapper_pkg.ros_msg.ros_dtype import ROSDtype
 import time
 import tf2_ros
 import geometry_msgs.msg
@@ -74,7 +75,7 @@ if __name__ == "__main__":
     wrapper = RosWrapper("test_node")
     test_data = [[1,2]]
     wrapper.add_subscriber("test", ROSDtype.FLOAT_ARRAY, test_data)
-    while True:
+    while not rospy.is_shutdown():
         time.sleep(0.1)
         print(test_data[0])
         
