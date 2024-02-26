@@ -91,9 +91,11 @@ class UR5MoveitInterface:
         move_group.go(joint_goal, wait=True)
         move_group.stop()
         current_joints = move_group.get_current_joint_values()
-        if all_close(joint_goal, current_joints, 0.01):
+        if all_close(joint_goal, current_joints, 0.05):
             print("joint state set success")
             return ActionResult.SUCCESS
+        else:
+            print("joint state set failed")
 
     def go_to_pose_goal(self, position, orientation): 
         """

@@ -8,7 +8,7 @@ from scipy.spatial.transform import Rotation
 import time
 from enum import Enum
 from std_msgs.msg import Float64
-
+import threading
 
 
 class JointConfiguration(Enum):
@@ -25,7 +25,14 @@ class TaskController:
         self.navi_target = [np.array([0, 0, 0]), 0.0]
         self.robot_pos = [np.array([0, 0, 0]), 0.0]
         self.work1_pos = [np.array([0.72, -0.82, 0.0]), -0.5 * np.pi]
+        self.pre_work1_pos = [np.array([0.72, -0.0, 0.0]), -0.5 * np.pi]
+        self.work2_pos = [np.array([-6.5, 0.82, 0.0]), 0.5 * np.pi]
+        self.pre_work2_pos = [np.array([-6.5, 0.0, 0.0]), 0.5 * np.pi]
         rospy.Subscriber("/odom", Odometry, self.odom_callback)
+        
+        self.send_command_thread = threading.Thread(target=self.send_command_thread_fun)
+        self.send_command_thread.setDaemon(True)
+        self.send_command_thread.start()
     
     def odom_callback(self, msg:Odometry):
         self.robot_pos[0] = [msg.pose.pose.position.x, msg.pose.pose.position.y ,msg.pose.pose.position.z]
@@ -49,6 +56,11 @@ class TaskController:
         msg.pose.orientation.w = orientation[3]
         self.movebase_goal_pub.publish(msg)
     
+    def send_command_thread_fun(self):
+        while not rospy.is_shutdown():
+            self.send_navigation_target(self.navi_target)
+            time.sleep(0.2)
+    
     def set_arm_joint_configuration(self, config:JointConfiguration):
         self.moveit_interface.go_to_joint_state(config.value)
     
@@ -57,8 +69,33 @@ class TaskController:
         msg.data = ratio
         self.grip_ratio_pub.publish(msg)
     
-    def step(self):
-        task_controller.send_navigation_target(self.work1_pos)
+    def has_reach_target(self, dist_thres=0.05, ang_thres=0.1):
+        dist_err = np.linalg.norm(self.robot_pos[0] - self.navi_target[0])
+        ang_err = np.linalg.norm(self.robot_pos[1] - self.navi_target[1])
+        return dist_err < dist_thres and ang_err < ang_thres
+    
+    def navigate_and_wait(self, target, timeout=20.0):
+        self.navi_target = target
+        wait = 0.0
+        while not self.has_reach_target():
+            time.sleep(0.1)
+            wait += 0.1
+            if wait > timeout:
+                print("navigation timeout!")
+                return
+    
+    def work(self):
+        self.set_arm_joint_configuration(JointConfiguration.UPRIGHT)
+        self.navigate_and_wait(self.pre_work1_pos)
+        self.set_arm_joint_configuration(JointConfiguration.DOWN_VIEW)
+        self.navigate_and_wait(self.work1_pos)
+        time.sleep(1)
+        self.navigate_and_wait(self.pre_work1_pos)
+        self.set_arm_joint_configuration(JointConfiguration.UPRIGHT)
+        self.navigate_and_wait(self.pre_work2_pos)
+        self.set_arm_joint_configuration(JointConfiguration.DOWN_VIEW)
+        self.navigate_and_wait(self.work2_pos)
+        
     
     
         
@@ -67,9 +104,9 @@ class TaskController:
 if __name__ == "__main__":
     rospy.init_node("task_controller")
     task_controller = TaskController()
-    task_controller.set_arm_joint_configuration(JointConfiguration.DOWN_VIEW)
-    while not rospy.is_shutdown():
-        task_controller.step()
-        time.sleep(0.1)
+    task_controller.work()
+    # while not rospy.is_shutdown():
+    #     task_controller.step()
+    #     time.sleep(0.1)
     
     
