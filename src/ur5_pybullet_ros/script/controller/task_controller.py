@@ -7,13 +7,13 @@ from nav_msgs.msg import Odometry
 from scipy.spatial.transform import Rotation
 import time
 from enum import Enum
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, Float64MultiArray
 import threading
 
 
 class JointConfiguration(Enum):
     UPRIGHT = [0.0,-0.5 * np.pi,0,0,0,0]
-    DOWN_VIEW = [0.0, -0.5 *np.pi, 0.45 * np.pi, -0.5 * np.pi, -0.5 * np.pi, 0]
+    DOWN_VIEW = [0.0, -0.5 *np.pi, 0.4 * np.pi, -0.5 * np.pi, -0.5 * np.pi, 0]
 
 class TaskController:
     def __init__(self):
@@ -28,14 +28,20 @@ class TaskController:
         self.pre_work1_pos = [np.array([0.72, -0.0, 0.0]), -0.5 * np.pi]
         self.work2_pos = [np.array([-6.5, 0.82, 0.0]), 0.5 * np.pi]
         self.pre_work2_pos = [np.array([-6.5, 0.0, 0.0]), 0.5 * np.pi]
+        self.target_pos = np.array([[0, 0, 0], [0, 0, 0]]).astype(Float64)
+        self.gripper_ratio = 1.0
         rospy.Subscriber("/odom", Odometry, self.odom_callback)
-        
+        rospy.Subscriber("/ur5_pybullet/target_position", Float64MultiArray, self.target_position_callback)
         self.send_command_thread = threading.Thread(target=self.send_command_thread_fun)
         self.send_command_thread.setDaemon(True)
         self.send_command_thread.start()
     
+    def target_position_callback(self, msg:Float64MultiArray):
+        self.target_pos[0] = msg.data[0:3]
+        self.target_pos[1] = msg.data[3:6]
+    
     def odom_callback(self, msg:Odometry):
-        self.robot_pos[0] = [msg.pose.pose.position.x, msg.pose.pose.position.y ,msg.pose.pose.position.z]
+        self.robot_pos[0] = np.array([msg.pose.pose.position.x, msg.pose.pose.position.y ,msg.pose.pose.position.z])
         orientation = [msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,msg.pose.pose.orientation.z, msg.pose.pose.orientation.w]
         self.robot_pos[1] = Rotation.from_quat(orientation).as_euler('xyz')[2]
         
@@ -59,17 +65,28 @@ class TaskController:
     def send_command_thread_fun(self):
         while not rospy.is_shutdown():
             self.send_navigation_target(self.navi_target)
+            self.moveit_interface.publish_status()
+            self.set_gripper_ratio(self.gripper_ratio)
             time.sleep(0.2)
     
     def set_arm_joint_configuration(self, config:JointConfiguration):
         self.moveit_interface.go_to_joint_state(config.value)
+    
+    def grab_target(self, target_pose):
+        target_pose[2] += 0.1
+        target_pose = np.array(target_pose)
+        base_orientation =  Rotation.from_euler('xyz', [0, 0, self.robot_pos[1]], degrees=False).as_quat()
+        base_position = self.robot_pos[0] + np.array([0, 0, 0.06])
+        target_pose_r = np.dot(np.linalg.inv(Rotation.from_quat(base_orientation).as_matrix()), (target_pose - base_position))
+        self.moveit_interface.go_to_pose_goal(target_pose_r, Rotation.from_euler('xyz', [0, 0.5 * np.pi, 0], degrees=False).as_quat(), "base_link")
+        self.gripper_ratio = 0.5
     
     def set_gripper_ratio(self, ratio):
         msg = Float64()
         msg.data = ratio
         self.grip_ratio_pub.publish(msg)
     
-    def has_reach_target(self, dist_thres=0.05, ang_thres=0.1):
+    def has_reach_target(self, dist_thres=0.1, ang_thres=0.1):
         dist_err = np.linalg.norm(self.robot_pos[0] - self.navi_target[0])
         ang_err = np.linalg.norm(self.robot_pos[1] - self.navi_target[1])
         return dist_err < dist_thres and ang_err < ang_thres
@@ -90,11 +107,15 @@ class TaskController:
         self.set_arm_joint_configuration(JointConfiguration.DOWN_VIEW)
         self.navigate_and_wait(self.work1_pos)
         time.sleep(1)
+        self.grab_target(self.target_pos[0])
+        time.sleep(0.5)
         self.navigate_and_wait(self.pre_work1_pos)
         self.set_arm_joint_configuration(JointConfiguration.UPRIGHT)
         self.navigate_and_wait(self.pre_work2_pos)
         self.set_arm_joint_configuration(JointConfiguration.DOWN_VIEW)
         self.navigate_and_wait(self.work2_pos)
+        self.gripper_ratio = 1.0
+        time.sleep(1)
         
     
     

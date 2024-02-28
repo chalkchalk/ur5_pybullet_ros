@@ -97,14 +97,14 @@ class UR5MoveitInterface:
         else:
             print("joint state set failed")
 
-    def go_to_pose_goal(self, position, orientation): 
+    def go_to_pose_goal(self, position, orientation, frame_id="base_link"): 
         """
         @param: position       position x y z 
         @param: orientation     x y z w
         @returns: bool
         """
         move_group = self.move_group
-        self.pose_goal.header.frame_id = "base_link"
+        self.pose_goal.header.frame_id = frame_id
         self.pose_goal.header.stamp = rospy.Time.now()
         self.pose_goal.pose.orientation.x = orientation[0]
         self.pose_goal.pose.orientation.y = orientation[1]
@@ -125,16 +125,16 @@ class UR5MoveitInterface:
                 return ActionResult.PLAN_FAILED
         except rospy.exceptions.ROSInterruptException:
             pass
-        move_group.execute(plan_to_current, wait=True)
-        # success = move_group.go(wait=True)
+        # move_group.execute(plan_to_current, wait=True)
+        success = move_group.go(wait=True)
         move_group.stop()
         move_group.clear_pose_targets()
         current_pose = self.move_group.get_current_pose().pose
         return all_close(self.pose_goal.pose, current_pose, 0.01)
     
-    def go_to_position_goal(self, position): 
+    def go_to_position_goal(self, position, frame_id="base_link"):  
         move_group = self.move_group
-        self.pose_goal.header.frame_id = "base_link"
+        self.pose_goal.header.frame_id = frame_id
         self.pose_goal.header.stamp = rospy.Time.now()
         self.pose_goal.pose.orientation.x = 0.0
         self.pose_goal.pose.orientation.y = 0.0
@@ -163,13 +163,14 @@ class UR5MoveitInterface:
         return all_close(self.pose_goal.pose, current_pose, 0.01)
     
     def publish_status(self):
-        self.goal_pose_pub.publish(self.pose_goal)
+        if self.pose_goal.header.frame_id:
+            self.goal_pose_pub.publish(self.pose_goal)
 
 if __name__ == "__main__":
     rospy.init_node("ur5_move_group_python_interface")
     ur5_moveit_interface = UR5MoveitInterface()
-    ur5_moveit_interface.go_to_joint_state([0,-0.5,0,0,0,0])
-    # ur5_moveit_interface.go_to_pose_goal([0.5,0.0,0.7], Rotation.from_euler('xyz', [0, 90, 0], degrees=True).as_quat())
+    # ur5_moveit_interface.go_to_joint_state([0,-0.5,0,0,0,0])
+    ur5_moveit_interface.go_to_pose_goal([0.5,0.0,0.7], Rotation.from_euler('xyz', [0, 90, 0], degrees=True).as_quat())
     # ur5_moveit_interface.go_to_position_goal([0.5,0.0,0.6])
     while True:
         ur5_moveit_interface.publish_status()

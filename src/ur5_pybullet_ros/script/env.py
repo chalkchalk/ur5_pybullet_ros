@@ -12,6 +12,7 @@ from moving_object.moving_object import MovingObject
 import yaml
 
 ROS_CLOCK_TOPIC = "clock"
+ROS_TARGET_POSITION_TOPIC = "target_position"
 
 @gin.configurable
 class Environment():
@@ -29,6 +30,7 @@ class Environment():
         self.realtime_factor = realtime_factor
         self.ros_wrapper = self.robot.ros_wrapper
         self.ros_wrapper.add_publisher(ROS_CLOCK_TOPIC, ROSDtype.CLOCK, False)
+        self.ros_wrapper.add_publisher(ROS_TARGET_POSITION_TOPIC, ROSDtype.FLOAT_ARRAY, True)
         self.udrf_path = os.path.dirname(os.path.abspath(__file__)) + "/urdf/objects/"
         self.grasp_target = []
         self.load_scenes()
@@ -72,8 +74,8 @@ class Environment():
         static_cube1 = p.loadURDF(self.udrf_path + 'cube/cube.urdf', [-3, -2, 0.3], [0, 0, 0, 1], globalScaling = 0.7, useFixedBase=True)
     
     def load_grasp_target(self):
-        self.grasp_target.append(p.loadURDF(self.udrf_path + 'ball/green_ball.urdf', [-6.5, 1.4, 0.5], [0, 0, 0, 1], globalScaling = 0.7))
         self.grasp_target.append(p.loadURDF(self.udrf_path + 'ball/red_ball.urdf', [0.8, -1.4, 0.5], [0, 0, 0, 1], globalScaling = 0.7))
+        self.grasp_target.append(p.loadURDF(self.udrf_path + 'ball/green_ball.urdf', [-6.5, 1.4, 0.5], [0, 0, 0, 1], globalScaling = 0.7))
     
     def load_moving_obstacle(self):
         moving_object_id_1 = p.loadURDF(self.udrf_path + 'cylinder.urdf', [-1.0, 1.4, 0.5], [0, 0, 0, 1])
@@ -89,11 +91,14 @@ class Environment():
         pos, ori = self.robot.get_end_state()
         offset = np.array([0.13, 0, 0.0])
         grip_pos = np.array(pos) + np.dot(Rotation.from_quat(ori).as_matrix(),offset)
+        target_position = []
         for target in self.grasp_target:
             target_pos = p.getBasePositionAndOrientation(target)[0]
+            target_position.extend(target_pos)
             dist = np.linalg.norm((np.array(target_pos) - np.array(grip_pos)))
             if dist < 0.08 and self.robot.gripper_open_ratio[0] < 0.8:
                 p.resetBasePositionAndOrientation(target, grip_pos, ori)
+        self.ros_wrapper.publish_msg(ROS_TARGET_POSITION_TOPIC, target_position)  
                 
         
         
