@@ -83,15 +83,15 @@ class TaskController:
         base_position = self.robot_pos[0] + np.array([0, 0, 0.06])
         target_pose_r = np.dot(np.linalg.inv(Rotation.from_quat(base_orientation).as_matrix()), (target_pose - base_position))
         self.moveit_interface.go_to_pose_goal(target_pose_r, Rotation.from_euler('xyz', [0, 0.5 * np.pi, 0], degrees=False).as_quat(), "base_link")
-        time.sleep(0.5)
-        target_pose[2] -= 0.13
+        time.sleep(0.1)
+        target_pose[2] -= 0.10
         base_orientation =  Rotation.from_euler('xyz', [0, 0, self.robot_pos[1]], degrees=False).as_quat()
         base_position = self.robot_pos[0] + np.array([0, 0, 0.06])
         target_pose_r = np.dot(np.linalg.inv(Rotation.from_quat(base_orientation).as_matrix()), (target_pose - base_position))
         self.moveit_interface.go_to_pose_goal(target_pose_r, Rotation.from_euler('xyz', [0, 0.5 * np.pi, 0], degrees=False).as_quat(), "base_link")
-        time.sleep(0.5)
+        time.sleep(0.1)
         
-        target_pose[2] -= 0.04
+        target_pose[2] -= 0.07
         base_orientation =  Rotation.from_euler('xyz', [0, 0, self.robot_pos[1]], degrees=False).as_quat()
         base_position = self.robot_pos[0] + np.array([0, 0, 0.06])
         target_pose_r = np.dot(np.linalg.inv(Rotation.from_quat(base_orientation).as_matrix()), (target_pose - base_position))
