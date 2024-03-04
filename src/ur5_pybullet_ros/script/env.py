@@ -58,6 +58,8 @@ class Environment():
         table1 = p.loadURDF(self.udrf_path + 'table/table.urdf', [0.8, -1.5, -0.25], [0, 0, 0, 1], useFixedBase=True, globalScaling = 1.0)
         # cube_small = p.loadURDF(self.udrf_path + 'cube/cube.urdf', [0.8, -1.6, 0.6], [0, 0, 0, 1], globalScaling = 0.2)
         table2 = p.loadURDF(self.udrf_path + 'table/table.urdf', [-6.5, 1.5, -0.25], [0, 0, 0, 1], useFixedBase=True, globalScaling = 1.0)
+        p.loadURDF('tray/tray.urdf', [-6.7, 1.35, 0.38], [0, 0, 0, 1],  globalScaling = 0.6)
+        p.loadURDF('tray/tray.urdf', [1.0, -1.35, 0.38], [0, 0, 0, 1],  globalScaling = 0.6)
         self.load_grasp_target()
         self.load_room()
         self.load_moving_obstacle()
@@ -74,8 +76,8 @@ class Environment():
         static_cube1 = p.loadURDF(self.udrf_path + 'cube/cube.urdf', [-3, -2, 0.3], [0, 0, 0, 1], globalScaling = 0.7, useFixedBase=True)
     
     def load_grasp_target(self):
-        self.grasp_target.append(p.loadURDF(self.udrf_path + 'ball/red_ball.urdf', [0.8, -1.4, 0.5], [0, 0, 0, 1], globalScaling = 0.7))
-        self.grasp_target.append(p.loadURDF(self.udrf_path + 'ball/green_ball.urdf', [-6.5, 1.4, 0.5], [0, 0, 0, 1], globalScaling = 0.7))
+        self.grasp_target.append(p.loadURDF(self.udrf_path + 'ball/red_ball.urdf', [0.65, -1.4, 0.4], [0, 0, 0, 1], globalScaling = 0.7))
+        self.grasp_target.append(p.loadURDF(self.udrf_path + 'ball/green_ball.urdf', [-6.25, 1.4, 0.4], [0, 0, 0, 1], globalScaling = 0.7))
     
     def load_moving_obstacle(self):
         moving_object_id_1 = p.loadURDF(self.udrf_path + 'cylinder.urdf', [-1.0, 1.4, 0.5], [0, 0, 0, 1])

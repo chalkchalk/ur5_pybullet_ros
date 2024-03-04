@@ -10,6 +10,13 @@ from enum import Enum
 from std_msgs.msg import Float64, Float64MultiArray
 import threading
 
+WORK1_POS = [np.array([0.65, -0.82, 0.0]), -0.5 * np.pi]
+PRE_WORK1_POS = [np.array([0.65, -0.0, 0.0]), -0.5 * np.pi]
+WORK2_POS = [np.array([-6.6, 0.82, 0.0]), 0.5 * np.pi]
+PRE_WORK2_POS = [np.array([-6.6, 0.0, 0.0]), 0.5 * np.pi]
+WORK3_POS = [np.array([-6.35, 0.82, 0.0]), 0.5 * np.pi]
+WORK4_POS = [np.array([1.0, -0.82, 0.0]), -0.5 * np.pi]
+PRE_WORK4_POS = [np.array([1.0, -0.0, 0.0]), -0.5 * np.pi]
 
 class JointConfiguration(Enum):
     UPRIGHT = [0.0,-0.5 * np.pi,0,0,0,0]
@@ -18,16 +25,11 @@ class JointConfiguration(Enum):
 class TaskController:
     def __init__(self):
         self.moveit_interface = UR5MoveitInterface()
-        self.moveit_interface.move_group.set_pose_reference_frame("base_link")
         self.movebase_goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=1)
         self.grip_ratio_pub = rospy.Publisher("/ur5_pybullet/gripper_open_ratio", Float64, queue_size=1)
         
         self.navi_target = [np.array([0, 0, 0]), 0.0]
         self.robot_pos = [np.array([0, 0, 0]), 0.0]
-        self.work1_pos = [np.array([0.72, -0.82, 0.0]), -0.5 * np.pi]
-        self.pre_work1_pos = [np.array([0.72, -0.0, 0.0]), -0.5 * np.pi]
-        self.work2_pos = [np.array([-6.5, 0.82, 0.0]), 0.5 * np.pi]
-        self.pre_work2_pos = [np.array([-6.5, 0.0, 0.0]), 0.5 * np.pi]
         self.target_pos = np.array([[0, 0, 0], [0, 0, 0]]).astype(Float64)
         self.gripper_ratio = 1.0
         rospy.Subscriber("/odom", Odometry, self.odom_callback)
@@ -64,7 +66,8 @@ class TaskController:
     
     def send_command_thread_fun(self):
         while not rospy.is_shutdown():
-            self.send_navigation_target(self.navi_target)
+            if self.navi_target:
+                self.send_navigation_target(self.navi_target)
             self.moveit_interface.publish_status()
             self.set_gripper_ratio(self.gripper_ratio)
             time.sleep(0.2)
@@ -73,12 +76,20 @@ class TaskController:
         self.moveit_interface.go_to_joint_state(config.value)
     
     def grab_target(self, target_pose):
-        target_pose[2] += 0.1
         target_pose = np.array(target_pose)
+        
+        target_pose[2] += 0.25
         base_orientation =  Rotation.from_euler('xyz', [0, 0, self.robot_pos[1]], degrees=False).as_quat()
         base_position = self.robot_pos[0] + np.array([0, 0, 0.06])
         target_pose_r = np.dot(np.linalg.inv(Rotation.from_quat(base_orientation).as_matrix()), (target_pose - base_position))
         self.moveit_interface.go_to_pose_goal(target_pose_r, Rotation.from_euler('xyz', [0, 0.5 * np.pi, 0], degrees=False).as_quat(), "base_link")
+        time.sleep(0.5)
+        target_pose[2] -= 0.15
+        base_orientation =  Rotation.from_euler('xyz', [0, 0, self.robot_pos[1]], degrees=False).as_quat()
+        base_position = self.robot_pos[0] + np.array([0, 0, 0.06])
+        target_pose_r = np.dot(np.linalg.inv(Rotation.from_quat(base_orientation).as_matrix()), (target_pose - base_position))
+        self.moveit_interface.go_to_pose_goal(target_pose_r, Rotation.from_euler('xyz', [0, 0.5 * np.pi, 0], degrees=False).as_quat(), "base_link")
+        time.sleep(0.5)
         self.gripper_ratio = 0.5
     
     def set_gripper_ratio(self, ratio):
@@ -99,23 +110,43 @@ class TaskController:
             wait += 0.1
             if wait > timeout:
                 print("navigation timeout!")
+                self.navi_target = None
                 return
+        self.navi_target = None
+        time.sleep(0.5)
+        
     
     def work(self):
         self.set_arm_joint_configuration(JointConfiguration.UPRIGHT)
-        self.navigate_and_wait(self.pre_work1_pos)
+        self.navigate_and_wait(PRE_WORK1_POS)
         self.set_arm_joint_configuration(JointConfiguration.DOWN_VIEW)
-        self.navigate_and_wait(self.work1_pos)
+        self.navigate_and_wait(WORK1_POS)
         time.sleep(1)
         self.grab_target(self.target_pos[0])
         time.sleep(0.5)
-        self.navigate_and_wait(self.pre_work1_pos)
+        self.navigate_and_wait(PRE_WORK1_POS)
         self.set_arm_joint_configuration(JointConfiguration.UPRIGHT)
-        self.navigate_and_wait(self.pre_work2_pos)
+        self.navigate_and_wait(PRE_WORK2_POS)
         self.set_arm_joint_configuration(JointConfiguration.DOWN_VIEW)
-        self.navigate_and_wait(self.work2_pos)
+        self.navigate_and_wait(WORK2_POS)
         self.gripper_ratio = 1.0
         time.sleep(1)
+        self.navigate_and_wait(WORK3_POS)
+        self.grab_target(self.target_pos[1])
+        time.sleep(0.5)
+        self.navigate_and_wait(PRE_WORK2_POS)
+        self.set_arm_joint_configuration(JointConfiguration.UPRIGHT)
+        self.navigate_and_wait(PRE_WORK4_POS)
+        self.set_arm_joint_configuration(JointConfiguration.DOWN_VIEW)
+        self.navigate_and_wait(WORK4_POS)
+        self.gripper_ratio = 1.0
+        time.sleep(0.5)
+        self.navigate_and_wait(PRE_WORK4_POS)
+        self.set_arm_joint_configuration(JointConfiguration.UPRIGHT)
+        
+        
+        
+        
         
     
     

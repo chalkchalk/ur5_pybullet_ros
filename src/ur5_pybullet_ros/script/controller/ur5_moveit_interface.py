@@ -169,6 +169,7 @@ class UR5MoveitInterface:
 if __name__ == "__main__":
     rospy.init_node("ur5_move_group_python_interface")
     ur5_moveit_interface = UR5MoveitInterface()
+    
     # ur5_moveit_interface.go_to_joint_state([0,-0.5,0,0,0,0])
     ur5_moveit_interface.go_to_pose_goal([0.5,0.0,0.7], Rotation.from_euler('xyz', [0, 90, 0], degrees=True).as_quat())
     # ur5_moveit_interface.go_to_position_goal([0.5,0.0,0.6])
